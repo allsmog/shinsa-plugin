@@ -42,7 +42,7 @@ If the control ID is not recognized, suggest the closest match.
 Identify the target path (default: current directory). Do a fast language detection:
 
 ```bash
-ls package.json pyproject.toml go.mod Cargo.toml pom.xml 2>/dev/null | head -1
+{ ls package.json pyproject.toml go.mod Cargo.toml pom.xml 2>/dev/null || true; } | head -1
 ```
 
 ## Step 3: Targeted assessment

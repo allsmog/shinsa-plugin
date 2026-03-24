@@ -17,6 +17,8 @@ allowed-tools:
 
 Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings.
 
+**Persistence rule**: Write artifacts to disk incrementally. Use the Write tool to save `.claude/shinsa-state.json` after each agent completes (not only at the end). Write `.claude/compliance-report.md` as the final step. This ensures partial runs still produce usable output.
+
 ## Flags
 
 | Flag | Effect |
@@ -33,7 +35,7 @@ Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings
 Check if a previous assessment exists:
 
 ```bash
-ls .claude/shinsa-state.json 2>/dev/null
+ls .claude/shinsa-state.json 2>/dev/null || true
 ```
 
 If `--resume` is passed and state exists, load it and skip completed agents. Otherwise start fresh.
@@ -44,7 +46,7 @@ Identify the repository structure, languages, and frameworks:
 
 1. **Language detection** — Check file extensions and package manifests:
    ```bash
-   ls package.json pyproject.toml requirements.txt go.mod Cargo.toml pom.xml composer.json Gemfile 2>/dev/null
+   ls package.json pyproject.toml requirements.txt go.mod Cargo.toml pom.xml composer.json Gemfile 2>/dev/null || true
    ```
 
 2. **Framework detection** — Identify web frameworks, ORMs, auth libraries:
@@ -53,7 +55,7 @@ Identify the repository structure, languages, and frameworks:
 
 3. **Architecture detection** — Check for infrastructure-as-code, CI/CD, Docker:
    ```bash
-   ls Dockerfile docker-compose.yml .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile terraform/*.tf k8s/*.yaml 2>/dev/null
+   ls Dockerfile docker-compose.yml .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile terraform/*.tf k8s/*.yaml 2>/dev/null || true
    ```
 
 4. **Size check** — Count source files:
@@ -88,28 +90,44 @@ Based on scope, determine which ISO 27001 Annex A controls are assessable from c
 
 If `--controls` or `--family` is specified, filter to those only.
 
-## Step 4: Run assessment agents
+## Step 4: Assess controls and persist incrementally
 
-Launch the 4 specialized assessment agents. Each agent receives:
-- Repository path and scope summary
-- Assigned control IDs with full definitions
-- Assessment methodology instructions
+**CRITICAL: Do NOT dispatch subagents for assessment. Perform the assessment INLINE to avoid subagent startup overhead. Assess each control domain in order, and IMMEDIATELY write the updated state file to `.claude/shinsa-state.json` after each domain before proceeding to the next.**
 
-**Agent dispatch order** (run in parallel where possible):
+**For each domain, do the assessment yourself (do not use the Agent tool):**
 
-1. **auth-assessor** — A.8.2, A.8.3, A.8.5 (authentication, authorization, access control)
-2. **crypto-assessor** — A.8.24, A.8.21 (cryptography, network service security)
-3. **data-protection-assessor** — A.8.10, A.8.11, A.8.12, A.5.14 (data handling, masking, leakage, transfer)
-4. **logging-assessor** — A.8.15, A.8.16, A.8.17, A.8.34 (logging, monitoring, clock sync, audit testing)
+### Domain 1: Authentication & Access Control (A.8.2, A.8.3, A.8.5)
+Search for auth implementations using Grep/Glob, read the relevant files, assess against the control requirements. Look for:
+- Password hashing algorithms, session management, JWT handling
+- Authorization middleware, RBAC, route protection
+- Rate limiting, account lockout
 
-For each agent, use the Agent tool to dispatch it with:
-- The control definitions from the iso-27001-annex-a skill
-- The repository scope context from Step 2
-- Instructions to produce structured assessment output
+**After assessing, IMMEDIATELY use Write tool to save `.claude/shinsa-state.json` with auth results.**
+
+### Domain 2: Cryptography (A.8.24, A.8.21)
+Search for crypto usage, TLS config, key management. Look for:
+- Algorithm choices, hardcoded keys, encryption modes
+- TLS/SSL configuration, certificate validation
+
+**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with crypto results added.**
+
+### Domain 3: Data Protection (A.8.10, A.8.11, A.8.12, A.5.14)
+Search for data handling, masking, leakage prevention. Look for:
+- PII in logs, error message sanitization, input validation
+- Data deletion, masking in API responses, security headers
+
+**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with data protection results added.**
+
+### Domain 4: Logging & Monitoring (A.8.15, A.8.16, A.8.17, A.8.34)
+Search for logging config, monitoring, audit trails. Look for:
+- Structured logging, security event coverage, sensitive data exclusion
+- Health checks, metrics, timestamp handling
+
+**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with logging results added.**
 
 ## Step 5: Aggregate results
 
-After all agents complete:
+After all agents complete (or as many as finished):
 
 1. **Merge control assessments** — Combine all agent outputs into a single assessment
 2. **Compute summary statistics**:

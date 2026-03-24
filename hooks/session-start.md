@@ -13,7 +13,7 @@ On session start, check for existing assessment state and provide context.
 Check for existing assessment state:
 
 ```bash
-ls .claude/shinsa-state.json .claude/compliance-report.md 2>/dev/null
+ls .claude/shinsa-state.json .claude/compliance-report.md 2>/dev/null || true
 ```
 
 ### If state file exists:
