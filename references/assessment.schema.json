@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Shinsa Compliance Assessment",
+  "description": "Schema for compliance assessment output produced by Shinsa agents",
+  "type": "object",
+  "required": ["schema_version", "assessment_id", "target", "standard", "completed_at", "summary", "controls"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "assessment_id": {
+      "type": "string",
+      "description": "Unique identifier for this assessment"
+    },
+    "target": {
+      "type": "string",
+      "description": "Path to the assessed repository"
+    },
+    "standard": {
+      "type": "string",
+      "enum": ["iso27001"],
+      "description": "Compliance standard assessed"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "infrastructure": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "source_file_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["controls_assessed", "implemented", "partially_implemented", "not_implemented", "not_applicable", "compliance_percentage", "average_maturity", "findings"],
+      "properties": {
+        "controls_assessed": { "type": "integer" },
+        "implemented": { "type": "integer" },
+        "partially_implemented": { "type": "integer" },
+        "not_implemented": { "type": "integer" },
+        "not_applicable": { "type": "integer" },
+        "compliance_percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+        "average_maturity": { "type": "number", "minimum": 1, "maximum": 5 },
+        "findings": {
+          "type": "object",
+          "required": ["total", "critical", "high", "medium", "low", "info"],
+          "properties": {
+            "total": { "type": "integer" },
+            "critical": { "type": "integer" },
+            "high": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "low": { "type": "integer" },
+            "info": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["control_id", "title", "status", "maturity", "confidence", "agent"],
+        "properties": {
+          "control_id": {
+            "type": "string",
+            "pattern": "^A\\.[5-8]\\.\\d{1,2}$"
+          },
+          "title": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["implemented", "partially_implemented", "not_implemented", "not_applicable", "not_assessed"]
+          },
+          "maturity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "agent": { "type": "string" },
+          "evidence_summary": { "type": "string" },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title", "severity", "description", "recommendation"],
+              "properties": {
+                "title": { "type": "string" },
+                "severity": {
+                  "type": "string",
+                  "enum": ["critical", "high", "medium", "low", "info"]
+                },
+                "description": { "type": "string" },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["file_path", "start_line", "assessment"],
+                    "properties": {
+                      "file_path": { "type": "string" },
+                      "start_line": { "type": "integer" },
+                      "end_line": { "type": "integer" },
+                      "snippet": { "type": "string" },
+                      "assessment": { "type": "string" }
+                    }
+                  }
+                },
+                "gap": { "type": "string" },
+                "recommendation": { "type": "string" }
+              }
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

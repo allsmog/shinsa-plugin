@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code session state (generated per-project, not part of the plugin)
+.claude/shinsa-state.json
+.claude/compliance-report.md
+.claude/shinsa.local.md
+
+# Environment
+.env
+.env.*
