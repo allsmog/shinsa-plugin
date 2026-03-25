@@ -9,10 +9,8 @@ Thumbs.db
 *.swo
 *~
 
-# Claude Code session state (generated per-project, not part of the plugin)
-.claude/shinsa-state.json
-.claude/compliance-report.md
-.claude/shinsa.local.md
+# Plugin output (generated per-project, not part of the plugin)
+shinsa-output/
 
 # Environment
 .env

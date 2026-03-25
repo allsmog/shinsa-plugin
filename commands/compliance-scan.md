@@ -17,7 +17,7 @@ allowed-tools:
 
 Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings.
 
-**Persistence rule**: Write artifacts to disk incrementally. Use the Write tool to save `.claude/shinsa-state.json` after each agent completes (not only at the end). Write `.claude/compliance-report.md` as the final step. This ensures partial runs still produce usable output.
+**Persistence rule**: Write artifacts to disk incrementally. Use the Write tool to save `shinsa-output/shinsa-state.json` after each agent completes (not only at the end). Write `shinsa-output/compliance-report.md` as the final step. This ensures partial runs still produce usable output.
 
 ## Flags
 
@@ -35,7 +35,7 @@ Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings
 Check if a previous assessment exists:
 
 ```bash
-ls .claude/shinsa-state.json 2>/dev/null || true
+ls shinsa-output/shinsa-state.json 2>/dev/null || true
 ```
 
 If `--resume` is passed and state exists, load it and skip completed agents. Otherwise start fresh.
@@ -92,7 +92,7 @@ If `--controls` or `--family` is specified, filter to those only.
 
 ## Step 4: Assess controls and persist incrementally
 
-**CRITICAL: Do NOT dispatch subagents for assessment. Perform the assessment INLINE to avoid subagent startup overhead. Assess each control domain in order, and IMMEDIATELY write the updated state file to `.claude/shinsa-state.json` after each domain before proceeding to the next.**
+**CRITICAL: Do NOT dispatch subagents for assessment. Perform the assessment INLINE to avoid subagent startup overhead. Assess each control domain in order, and IMMEDIATELY write the updated state file to `shinsa-output/shinsa-state.json` after each domain before proceeding to the next.**
 
 **For each domain, do the assessment yourself (do not use the Agent tool):**
 
@@ -102,44 +102,44 @@ Search for auth implementations using Grep/Glob, read the relevant files, assess
 - Authorization middleware, RBAC, route protection
 - Rate limiting, account lockout
 
-**After assessing, IMMEDIATELY use Write tool to save `.claude/shinsa-state.json` with auth results.**
+**After assessing, IMMEDIATELY use Write tool to save `shinsa-output/shinsa-state.json` with auth results.**
 
 ### Domain 2: Cryptography (A.8.24, A.8.21)
 Search for crypto usage, TLS config, key management. Look for:
 - Algorithm choices, hardcoded keys, encryption modes
 - TLS/SSL configuration, certificate validation
 
-**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with crypto results added.**
+**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with crypto results added.**
 
 ### Domain 3: Data Protection (A.8.10, A.8.11, A.8.12, A.5.14)
 Search for data handling, masking, leakage prevention. Look for:
 - PII in logs, error message sanitization, input validation
 - Data deletion, masking in API responses, security headers
 
-**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with data protection results added.**
+**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with data protection results added.**
 
 ### Domain 4: Logging & Monitoring (A.8.15, A.8.16, A.8.17, A.8.34)
 Search for logging config, monitoring, audit trails. Look for:
 - Structured logging, security event coverage, sensitive data exclusion
 - Health checks, metrics, timestamp handling
 
-**After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with logging results added.**
+**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with logging results added.**
 
 ## Step 5: Final state update
 
-After all 4 domains are assessed, read `.claude/shinsa-state.json` from disk, compute final summary, and write the completed state. The state file should already contain all control assessments from incremental writes — just update `completed_at` and the final summary totals.
+After all 4 domains are assessed, read `shinsa-output/shinsa-state.json` from disk, compute final summary, and write the completed state. The state file should already contain all control assessments from incremental writes — just update `completed_at` and the final summary totals.
 
-**How to write**: Use `mkdir -p .claude && cat > .claude/shinsa-state.json << 'JSONEOF'` via Bash.
+**How to write**: Use `mkdir -p shinsa-output && cat > shinsa-output/shinsa-state.json << 'JSONEOF'` via Bash.
 
 ## Step 6: Generate report (from state file only)
 
-**IMPORTANT: Generate the report by reading `.claude/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
+**IMPORTANT: Generate the report by reading `shinsa-output/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
 
-Write human-readable report to `.claude/compliance-report.md` using `cat > .claude/compliance-report.md << 'REPORTEOF'` via Bash.
+Write human-readable report to `shinsa-output/compliance-report.md` using `cat > shinsa-output/compliance-report.md << 'REPORTEOF'` via Bash.
 
 ## State file schema
 
-`.claude/shinsa-state.json`:
+`shinsa-output/shinsa-state.json`:
 
 ```json
 {
@@ -187,7 +187,7 @@ Write human-readable report to `.claude/compliance-report.md` using `cat > .clau
 
 ## Step 7: Generate report
 
-Write human-readable report to `.claude/compliance-report.md`:
+Write human-readable report to `shinsa-output/compliance-report.md`:
 
 ```markdown
 # ISO 27001 Annex A Compliance Assessment
@@ -243,7 +243,7 @@ Write human-readable report to `.claude/compliance-report.md`:
 Output the full assessment as structured JSON (all control assessments with findings and evidence).
 
 ### `--format md` (default)
-Display the compliance report summary in the conversation. Reference `.claude/compliance-report.md` for the full report.
+Display the compliance report summary in the conversation. Reference `shinsa-output/compliance-report.md` for the full report.
 
 ## Notes
 

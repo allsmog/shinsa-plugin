@@ -13,12 +13,12 @@ On session start, check for existing assessment state and provide context.
 Check for existing assessment state:
 
 ```bash
-ls .claude/shinsa-state.json .claude/compliance-report.md 2>/dev/null || true
+ls shinsa-output/shinsa-state.json shinsa-output/compliance-report.md 2>/dev/null || true
 ```
 
 ### If state file exists:
 
-Read `.claude/shinsa-state.json` and display:
+Read `shinsa-output/shinsa-state.json` and display:
 
 ```
 **Shinsa Compliance Assessment Resumed**
@@ -80,7 +80,7 @@ Type `/shinsa:compliance-scan` to begin a full assessment.
 Check for API key configuration:
 
 ```bash
-cat .claude/shinsa.local.md 2>/dev/null | head -5
+cat shinsa-output/shinsa.local.md 2>/dev/null | head -5
 ```
 
 If the file contains a `shinsa_api_key` in YAML frontmatter, note that Pro mode is available:

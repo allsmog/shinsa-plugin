@@ -62,5 +62,5 @@ All agents produce structured assessments with:
 
 ## State Files
 
-- `.claude/shinsa-state.json` — Machine-readable assessment state
-- `.claude/compliance-report.md` — Human-readable compliance report
+- `shinsa-output/shinsa-state.json` — Machine-readable assessment state
+- `shinsa-output/compliance-report.md` — Human-readable compliance report
