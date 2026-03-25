@@ -125,22 +125,21 @@ Search for logging config, monitoring, audit trails. Look for:
 
 **After assessing, IMMEDIATELY use Write tool to update `.claude/shinsa-state.json` with logging results added.**
 
-## Step 5: Aggregate results
+## Step 5: Final state update
 
-After all agents complete (or as many as finished):
+After all 4 domains are assessed, read `.claude/shinsa-state.json` from disk, compute final summary, and write the completed state. The state file should already contain all control assessments from incremental writes — just update `completed_at` and the final summary totals.
 
-1. **Merge control assessments** — Combine all agent outputs into a single assessment
-2. **Compute summary statistics**:
-   - Total controls assessed
-   - Controls by status (implemented, partially_implemented, not_implemented, not_applicable)
-   - Findings by severity (critical, high, medium, low, info)
-   - Average maturity score
-   - Overall compliance percentage
-3. **Apply severity filter** — If `--severity` is set, filter findings below threshold
+**How to write**: Use `mkdir -p .claude && cat > .claude/shinsa-state.json << 'JSONEOF'` via Bash.
 
-## Step 6: Write state file
+## Step 6: Generate report (from state file only)
 
-Write machine-readable state to `.claude/shinsa-state.json`:
+**IMPORTANT: Generate the report by reading `.claude/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
+
+Write human-readable report to `.claude/compliance-report.md` using `cat > .claude/compliance-report.md << 'REPORTEOF'` via Bash.
+
+## State file schema
+
+`.claude/shinsa-state.json`:
 
 ```json
 {
