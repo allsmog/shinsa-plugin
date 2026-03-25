@@ -166,6 +166,31 @@ shinsa_api_key: your-api-key-here
 ---
 ```
 
+## E2E Verified
+
+Tested against an intentionally insecure Node.js fixture app with hardcoded credentials, broken auth, plaintext logging, and MD5 crypto:
+
+```
+$ /shinsa:compliance-scan
+
+shinsa-state.json    121 lines
+compliance-report.md 309 lines
+
+Controls assessed:  11
+Implemented:         0 (0%)
+Partially impl:      1 (9%)
+Not implemented:    10 (91%)
+Average maturity:    0.5 / 5
+
+Findings: 26 total
+  Critical: 7  (plaintext passwords, forgeable tokens, hardcoded secrets, MD5, secret leakage, stack traces)
+  High:     9  (no rate limiting, no TLS, passwords in logs, PII unmasked, no RBAC)
+  Medium:   6  (loose equality, no lockout, no session expiry, no input validation)
+  Low:      4  (no structured logging, no monitoring, no log rotation)
+```
+
+Every finding includes `file:line` evidence (e.g., `src/auth.js:4`, `src/config.js:9`).
+
 ## Limitations
 
 - This plugin assesses **code-level** compliance only. Organizational controls (A.5), people controls (A.6), and physical controls (A.7) require manual evidence.
