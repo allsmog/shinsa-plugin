@@ -7,7 +7,7 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "assessment_id": {
       "type": "string",
@@ -19,7 +19,7 @@
     },
     "standard": {
       "type": "string",
-      "enum": ["iso27001"],
+      "enum": ["iso27001", "nist-800-53"],
       "description": "Compliance standard assessed"
     },
     "started_at": {
@@ -83,7 +83,15 @@
         "properties": {
           "control_id": {
             "type": "string",
-            "pattern": "^A\\.[5-8]\\.\\d{1,2}$"
+            "description": "Control identifier. ISO format: A.X.X, NIST format: XX-N",
+            "oneOf": [
+              { "pattern": "^A\\.[5-8]\\.\\d{1,2}$" },
+              { "pattern": "^(AC|AU|AT|CA|CM|CP|IA|IR|MA|MP|PE|PL|PM|PS|PT|RA|SA|SC|SI|SR)-\\d{1,2}$" }
+            ]
+          },
+          "control_family": {
+            "type": "string",
+            "description": "Control family identifier (e.g., AC, AU, SC for NIST; A.8 for ISO)"
           },
           "title": { "type": "string" },
           "status": {

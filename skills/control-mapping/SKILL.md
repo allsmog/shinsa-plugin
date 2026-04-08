@@ -19,7 +19,6 @@ Map ISO 27001 Annex A controls to equivalent or related controls in SOC 2 Type I
 - When a user needs to understand how ISO 27001 findings map to other standards
 - When preparing for multiple compliance certifications
 - When generating cross-standard compliance reports
-- When the Pro tier (future) maps findings across frameworks
 
 ## Mapping Relationships
 
@@ -100,10 +99,81 @@ When evidence satisfies an ISO 27001 control with an `equivalent` mapping, that 
 
 A gap in one control amplifies across mapped controls. If A.8.5 is `not_implemented`, the equivalent controls in SOC 2, NIST, and PCI DSS are also `not_implemented`. This makes cross-standard deduplication valuable — fix one gap, close multiple compliance items.
 
-## Pro Tier Note
+## NIST 800-53 to ISO 27001 Reverse Mappings
 
-In the community edition, this mapping is informational. The Pro tier (via Shinsa API) provides:
-- Automated cross-standard assessment (scan once, report across all 5 frameworks)
-- 53 verified cross-standard mappings with relationship types
-- Deduplication engine that consolidates findings across standards
-- Multi-framework compliance reports
+### Access Control (AC) → ISO 27001
+
+| NIST 800-53 | ISO 27001 | Relationship |
+|-------------|-----------|-------------|
+| AC-2 (Account mgmt) | A.5.16 (Identity mgmt) | partial |
+| AC-3 (Access enforcement) | A.8.3 (Access restriction) | equivalent |
+| AC-5 (Separation of duties) | A.5.3 (Segregation of duties) | equivalent |
+| AC-6 (Least privilege) | A.8.2 (Privileged access) | equivalent |
+| AC-7 (Failed logon) | A.8.5 (Secure auth) | partial |
+| AC-11 (Session lock) | A.8.5 (Secure auth) | partial |
+| AC-12 (Session termination) | A.8.5 (Secure auth) | partial |
+
+### Identification and Authentication (IA) → ISO 27001
+
+| NIST 800-53 | ISO 27001 | Relationship |
+|-------------|-----------|-------------|
+| IA-2 (Auth mechanisms) | A.8.5 (Secure auth) | equivalent |
+| IA-4 (Identifier mgmt) | A.5.16 (Identity mgmt) | partial |
+| IA-5 (Authenticator mgmt) | A.8.5 (Secure auth), A.5.17 (Auth info) | equivalent |
+| IA-6 (Auth feedback) | A.8.5 (Secure auth) | partial |
+
+### Audit and Accountability (AU) → ISO 27001
+
+| NIST 800-53 | ISO 27001 | Relationship |
+|-------------|-----------|-------------|
+| AU-2 (Event logging) | A.8.15 (Logging) | equivalent |
+| AU-3 (Audit record content) | A.8.15 (Logging) | equivalent |
+| AU-6 (Review/analysis) | A.8.16 (Monitoring) | partial |
+| AU-8 (Timestamps) | A.8.17 (Clock sync) | equivalent |
+| AU-9 (Audit protection) | A.8.15 (Logging) | partial |
+
+### System and Communications Protection (SC) → ISO 27001
+
+| NIST 800-53 | ISO 27001 | Relationship |
+|-------------|-----------|-------------|
+| SC-4 (Shared resources) | A.8.11 (Data masking) | equivalent |
+| SC-7 (Boundary protection) | A.8.12 (Leakage prevention) | partial |
+| SC-8 (Transmission security) | A.8.21 (Network services), A.5.14 (Transfer) | equivalent |
+| SC-12 (Key mgmt) | A.8.24 (Cryptography) | partial |
+| SC-13 (Crypto protection) | A.8.24 (Cryptography) | equivalent |
+| SC-23 (Session authenticity) | A.8.5 (Secure auth) | partial |
+| SC-28 (Data at rest) | A.8.24 (Cryptography) | partial |
+
+### System and Information Integrity (SI) → ISO 27001
+
+| NIST 800-53 | ISO 27001 | Relationship |
+|-------------|-----------|-------------|
+| SI-2 (Flaw remediation) | A.8.8 (Vulnerability mgmt) | equivalent |
+| SI-4 (System monitoring) | A.8.16 (Monitoring) | equivalent |
+| SI-10 (Input validation) | A.8.12 (Leakage prevention), A.8.28 (Secure coding) | equivalent |
+| SI-11 (Error handling) | A.8.12 (Leakage prevention) | partial |
+| SI-12 (Info retention) | A.8.10 (Deletion) | equivalent |
+| MP-6 (Media sanitization) | A.8.10 (Deletion) | equivalent |
+
+### NIST Controls Without ISO 27001 Equivalent
+
+The following NIST 800-53 controls have no direct ISO 27001 Annex A equivalent:
+
+| NIST 800-53 | Notes |
+|-------------|-------|
+| AC-8 (System use notification) | No ISO equivalent — login banners/terms |
+| AC-14 (Actions without auth) | No ISO equivalent — unauthenticated access inventory |
+| AU-4 (Storage capacity) | No ISO equivalent — log storage sizing |
+| AU-5 (Failure response) | No ISO equivalent — logging failure handling |
+| AU-7 (Reduction/reporting) | No ISO equivalent — log query capability |
+| AU-11 (Record retention) | Partial overlap with A.8.15 but distinct focus |
+| AU-12 (Record generation) | Partial overlap with A.8.15 but distinct focus |
+| CM-2 (Baseline config) | A.8.9 (Config mgmt) is partial overlap |
+| CM-3 (Change control) | A.8.32 (Change mgmt) is manual-only in ISO |
+| CM-5 (Change access) | No direct ISO equivalent |
+| CM-7 (Least functionality) | No direct ISO equivalent |
+| CM-8 (Component inventory) | A.5.9 (Asset inventory) is manual-only in ISO |
+| RA-5 (Vuln scanning) | A.8.8 (Vulnerability mgmt) is partial overlap |
+| SA-3 (SDLC) | A.8.25 (Secure SDLC) is partial overlap |
+| SA-4 (Acquisition process) | No direct ISO equivalent for code-level |
+| SA-15 (Dev standards) | No direct ISO equivalent for code-level |

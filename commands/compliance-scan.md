@@ -24,7 +24,7 @@ Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings
 | Flag | Effect |
 |------|--------|
 | `--controls` | Assess specific controls only (comma-separated IDs, e.g., `A.8.5,A.8.24`) |
-| `--family` | Assess an entire control family (`A.5`, `A.6`, `A.7`, or `A.8`) |
+| `--family` | Assess the supported shipped controls within a family (`A.5` or `A.8`) |
 | `--severity` | Only report findings at or above severity (e.g., `--severity high`) |
 | `--format` | Output format: `json` or `md` (default: both) |
 | `--output` | Save report to a specific file path |
@@ -67,9 +67,9 @@ Record the scope in a brief summary for agent context.
 
 ## Step 3: Determine applicable controls
 
-Based on scope, determine which ISO 27001 Annex A controls are assessable from code:
+Based on scope, determine which ISO 27001 Annex A controls are scored by the shipped full scan:
 
-**Always applicable** (technological controls assessable from source):
+**Shipped full-scan coverage**:
 - A.8.2 (Privileged access rights)
 - A.8.3 (Information access restriction)
 - A.8.5 (Secure authentication)
@@ -78,17 +78,17 @@ Based on scope, determine which ISO 27001 Annex A controls are assessable from c
 - A.8.12 (Data leakage prevention)
 - A.8.15 (Logging)
 - A.8.16 (Monitoring activities)
+- A.8.17 (Clock synchronization)
 - A.8.21 (Security of network services)
 - A.8.24 (Use of cryptography)
-- A.8.28 (Secure coding)
+- A.8.34 (Protection of information systems during audit testing)
 - A.5.14 (Information transfer)
 
-**Conditionally applicable** (based on detected infrastructure):
-- A.8.9 (Configuration management) — if IaC detected
-- A.8.25 (Secure development life cycle) — if CI/CD detected
-- A.8.31 (Separation of environments) — if Docker/K8s detected
+**Reference-only ISO guidance**:
+- The ISO reference skill also documents additional conditional and adjacent controls such as A.8.9, A.8.25, A.8.28, and A.8.31.
+- Use those as supporting context during analysis, but the shipped full scan currently produces standalone scored results only for the 13 controls above.
 
-If `--controls` or `--family` is specified, filter to those only.
+If `--controls` or `--family` is specified, filter to the shipped full-scan controls above only. If the user requests another ISO control, explain that the reference skill includes guidance for it but the shipped full scan does not currently score it as a standalone result.
 
 ## Step 4: Assess controls and persist incrementally
 
@@ -131,18 +131,14 @@ After all 4 domains are assessed, read `shinsa-output/shinsa-state.json` from di
 
 **How to write**: Use `mkdir -p shinsa-output && cat > shinsa-output/shinsa-state.json << 'JSONEOF'` via Bash.
 
-## Step 6: Generate report (from state file only)
-
-**IMPORTANT: Generate the report by reading `shinsa-output/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
-
-Write human-readable report to `shinsa-output/compliance-report.md` using `cat > shinsa-output/compliance-report.md << 'REPORTEOF'` via Bash.
-
 ## State file schema
 
 `shinsa-output/shinsa-state.json`:
 
 ```json
 {
+  "schema_version": "1.1.0",
+  "assessment_id": "<unique-id>",
   "target": "<project-path>",
   "standard": "iso27001",
   "started_at": "<ISO-8601>",
@@ -156,10 +152,10 @@ Write human-readable report to `shinsa-output/compliance-report.md` using `cat >
   },
   "agents_completed": ["auth-assessor", "crypto-assessor", "data-protection-assessor", "logging-assessor"],
   "summary": {
-    "controls_assessed": 12,
+    "controls_assessed": 13,
     "implemented": 8,
     "partially_implemented": 2,
-    "not_implemented": 1,
+    "not_implemented": 2,
     "not_applicable": 1,
     "compliance_percentage": 75,
     "average_maturity": 3.2,
@@ -174,7 +170,9 @@ Write human-readable report to `shinsa-output/compliance-report.md` using `cat >
   },
   "controls": [
     {
-      "controlId": "A.8.5",
+      "control_id": "A.8.5",
+      "control_family": "A.8",
+      "title": "Secure authentication",
       "status": "partially_implemented",
       "maturity": 3,
       "confidence": 0.85,
@@ -185,9 +183,11 @@ Write human-readable report to `shinsa-output/compliance-report.md` using `cat >
 }
 ```
 
-## Step 7: Generate report
+## Step 6: Generate report (from state file only)
 
-Write human-readable report to `shinsa-output/compliance-report.md`:
+**IMPORTANT: Generate the report by reading `shinsa-output/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
+
+Write human-readable report to `shinsa-output/compliance-report.md` using `cat > shinsa-output/compliance-report.md << 'REPORTEOF'` via Bash:
 
 ```markdown
 # ISO 27001 Annex A Compliance Assessment
@@ -237,7 +237,7 @@ Write human-readable report to `shinsa-output/compliance-report.md`:
 3. ...
 ```
 
-## Step 8: Emit requested format
+## Step 7: Emit requested format
 
 ### `--format json`
 Output the full assessment as structured JSON (all control assessments with findings and evidence).

@@ -18,8 +18,9 @@ ls shinsa-output/shinsa-state.json shinsa-output/compliance-report.md 2>/dev/nul
 
 ### If state file exists:
 
-Read `shinsa-output/shinsa-state.json` and display:
+Read `shinsa-output/shinsa-state.json` and display. Check the `standard` field to determine which standard was assessed:
 
+**If standard is "iso27001":**
 ```
 **Shinsa Compliance Assessment Resumed**
 
@@ -33,8 +34,32 @@ Previous assessment detected:
 - **Last Updated**: [timestamp]
 
 **Quick Actions:**
-- `/shinsa:compliance-scan --resume` - Continue from where you left off
-- `/shinsa:quick-check A.8.5` - Check a specific control
+- `/shinsa:compliance-scan --resume` - Continue ISO 27001 assessment
+- `/shinsa:quick-check A.8.5` - Check a specific ISO control
+- `/shinsa:nist-scan` - Start a NIST 800-53 assessment
+- Type "reset assessment" to start fresh
+
+**Top Findings:**
+[List top 3 findings by severity]
+```
+
+**If standard is "nist-800-53":**
+```
+**Shinsa Compliance Assessment Resumed**
+
+Previous assessment detected:
+- **Target**: [From state file]
+- **Standard**: NIST SP 800-53 Rev 5
+- **Domains Completed**: [List of completed domains]
+- **Controls Assessed**: [count]
+- **Compliance**: [percentage]%
+- **Findings**: [total] ([critical] critical, [high] high, [medium] medium, [low] low)
+- **Last Updated**: [timestamp]
+
+**Quick Actions:**
+- `/shinsa:nist-scan --resume` - Continue NIST 800-53 assessment
+- `/shinsa:nist-quick-check AC-3` - Check a specific NIST control
+- `/shinsa:compliance-scan` - Start an ISO 27001 assessment
 - Type "reset assessment" to start fresh
 
 **Top Findings:**
@@ -54,39 +79,22 @@ Display welcome:
 ```
 **Shinsa Compliance Plugin Ready**
 
-ISO 27001:2022 Annex A compliance assessment with evidence-backed findings.
+Compliance assessment with evidence-backed findings tied to specific files and line numbers.
+
+**Available Standards:**
+- **ISO 27001:2022** — Annex A technological controls (13 controls, 4 domains)
+- **NIST SP 800-53 Rev 5** — Federal security controls (53 controls, 6 domains)
 
 **Available Commands:**
-- `/shinsa:compliance-scan` - Full compliance assessment (4 agents, 12+ controls)
-- `/shinsa:quick-check <control>` - Fast check of a specific control
+- `/shinsa:compliance-scan` - Full ISO 27001 assessment
+- `/shinsa:quick-check <control>` - Fast ISO control check (e.g., A.8.5)
+- `/shinsa:nist-scan` - Full NIST 800-53 assessment
+- `/shinsa:nist-quick-check <control>` - Fast NIST control check (e.g., AC-3)
 
 **Quick Start Examples:**
-- `/shinsa:quick-check A.8.5` - Check secure authentication
-- `/shinsa:quick-check A.8.24` - Check cryptography
-- `/shinsa:quick-check A.8.15` - Check logging
-- `/shinsa:compliance-scan` - Full assessment
-
-**What Gets Assessed:**
-- Authentication & access control (A.8.2, A.8.3, A.8.5)
-- Cryptography & network security (A.8.21, A.8.24)
-- Data protection & privacy (A.8.10, A.8.11, A.8.12, A.5.14)
-- Logging & monitoring (A.8.15, A.8.16, A.8.17, A.8.34)
-
-Type `/shinsa:compliance-scan` to begin a full assessment.
+- `/shinsa:compliance-scan` - Full ISO 27001 assessment
+- `/shinsa:nist-scan` - Full NIST 800-53 assessment
+- `/shinsa:quick-check A.8.5` - Check ISO secure authentication
+- `/shinsa:nist-quick-check AC-3` - Check NIST access enforcement
+- `/shinsa:nist-quick-check AU` - Check all NIST audit controls
 ```
-
-## Pro Mode Detection
-
-Check for API key configuration:
-
-```bash
-cat shinsa-output/shinsa.local.md 2>/dev/null | head -5
-```
-
-If the file contains a `shinsa_api_key` in YAML frontmatter, note that Pro mode is available:
-
-```
-**Pro Mode Active** — Additional frameworks available: SOC 2, NIST 800-53, PCI DSS v4.0, ISO 42001
-```
-
-If no API key is found, this is community mode (ISO 27001 only). Do not mention Pro mode unless the user asks about additional frameworks.

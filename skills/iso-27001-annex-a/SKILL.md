@@ -21,6 +21,18 @@ Comprehensive reference for all 93 ISO 27001:2022 Annex A controls, with focus o
 - When answering questions about ISO 27001 requirements
 - When mapping findings to compliance frameworks
 
+## Shipped Command Coverage
+
+This skill is intentionally broader than the currently shipped ISO scan commands.
+
+The shipped `/shinsa:compliance-scan` and `/shinsa:quick-check` commands currently produce standalone scored assessments for 13 core controls:
+- A.8.2, A.8.3, A.8.5
+- A.8.10, A.8.11, A.8.12, A.5.14
+- A.8.15, A.8.16, A.8.17, A.8.34
+- A.8.21, A.8.24
+
+Additional controls in the reference files, including A.8.9, A.8.25, A.8.28, and A.8.31, remain useful as guidance and supporting context but are not currently emitted by the shipped commands as standalone scored results.
+
 ## Control Families
 
 ISO 27001:2022 Annex A organizes 93 controls into 4 families:

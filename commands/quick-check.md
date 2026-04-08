@@ -18,7 +18,7 @@ Fast, focused compliance check against a single ISO 27001 control or control fam
 ```
 /shinsa:quick-check A.8.5              # Check secure authentication
 /shinsa:quick-check A.8.24             # Check cryptography
-/shinsa:quick-check A.8                # Check all technological controls
+/shinsa:quick-check A.8                # Check all supported ISO scan controls
 /shinsa:quick-check A.8.15 src/        # Check logging in specific path
 /shinsa:quick-check A.8.5 --verbose    # Detailed output with all evidence
 ```
@@ -33,9 +33,13 @@ Fast, focused compliance check against a single ISO 27001 control or control fam
 
 Determine what to check:
 - **Single control** (e.g., `A.8.5`): Look up the control definition from the iso-27001-annex-a skill
-- **Control family** (e.g., `A.8`): Look up all controls in that family
+- **Control family** (e.g., `A.8`): Look up all supported shipped quick-check controls in that family
 
 If the control ID is not recognized, suggest the closest match.
+
+**Current shipped ISO quick-check coverage**: A.8.2, A.8.3, A.8.5, A.8.10, A.8.11, A.8.12, A.8.15, A.8.16, A.8.17, A.8.21, A.8.24, A.8.34, and A.5.14.
+
+If the user requests another ISO control, explain that the ISO reference skill includes broader Annex A guidance, but the shipped quick-check command currently scores only the supported controls listed above.
 
 ## Step 2: Quick scope
 

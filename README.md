@@ -1,13 +1,13 @@
-# Shinsa (審査) — ISO 27001 Compliance Plugin for Claude Code
+# Shinsa (審査) — Compliance Assessment Plugin for Claude Code
 
-AI-first compliance assessment that scans your codebase against ISO 27001:2022 Annex A controls with evidence-backed findings tied to specific files and line numbers.
+AI-first compliance assessment that scans your codebase against ISO 27001:2022 Annex A and NIST SP 800-53 Rev 5 controls with evidence-backed findings tied to specific files and line numbers.
 
-Unlike checkbox-based GRC tools, Shinsa actually reads your code and tells you *exactly* where your authentication middleware uses `==` instead of constant-time comparison — and which ISO 27001 control it violates.
+Unlike checkbox-based GRC tools, Shinsa actually reads your code and tells you *exactly* where your authentication middleware uses `==` instead of constant-time comparison — and which control it violates.
 
 ## What You Get
 
-- **12+ ISO 27001 Annex A controls** assessed from source code
-- **4 specialized agents** (auth, crypto, data protection, logging)
+- **13 shipped ISO 27001 controls** and **53 shipped NIST SP 800-53 controls**
+- **10 specialized agents** across ISO and NIST domains
 - **Evidence-anchored findings** with file paths, line numbers, and code snippets
 - **Maturity scoring** (CMM 1-5) per control
 - **Cross-standard mapping** to SOC 2, NIST 800-53, and PCI DSS v4.0
@@ -40,19 +40,28 @@ Then add to your Claude Code settings:
 # Full ISO 27001 compliance assessment
 /shinsa:compliance-scan
 
-# Check a specific control
+# Full NIST SP 800-53 compliance assessment
+/shinsa:nist-scan
+
+# Check a specific ISO control
 /shinsa:quick-check A.8.5          # Secure authentication
 /shinsa:quick-check A.8.24         # Cryptography
 /shinsa:quick-check A.8.15         # Logging
-/shinsa:quick-check A.8             # All technological controls
+/shinsa:quick-check A.8            # All supported ISO scan controls
+
+# Check a specific NIST control
+/shinsa:nist-quick-check AC-3      # Access enforcement
+/shinsa:nist-quick-check AU        # All NIST audit controls
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/shinsa:compliance-scan` | Full ISO 27001 Annex A assessment with all 4 agents |
-| `/shinsa:quick-check <control>` | Fast check of a specific control or family |
+| `/shinsa:compliance-scan` | Full ISO 27001 Annex A assessment with the 13 shipped ISO controls |
+| `/shinsa:quick-check <control>` | Fast check of the supported ISO scan controls |
+| `/shinsa:nist-scan` | Full NIST SP 800-53 Rev 5 assessment with 53 shipped controls |
+| `/shinsa:nist-quick-check <control>` | Fast check of a specific NIST control or family |
 
 ### compliance-scan flags
 
@@ -66,12 +75,25 @@ Then add to your Claude Code settings:
 
 ## Agents
 
+### ISO 27001 Agents
+
 | Agent | Domain | Controls |
 |-------|--------|----------|
 | **auth-assessor** | Authentication, authorization, access control | A.8.2, A.8.3, A.8.5 |
 | **crypto-assessor** | Cryptography, TLS, key management | A.8.21, A.8.24 |
 | **data-protection-assessor** | Data masking, leakage prevention, transfers | A.5.14, A.8.10, A.8.11, A.8.12 |
 | **logging-assessor** | Logging, monitoring, clock sync, audit | A.8.15, A.8.16, A.8.17, A.8.34 |
+
+### NIST SP 800-53 Agents
+
+| Agent | Domain | Control Families |
+|-------|--------|-----------------|
+| **nist-access-control-assessor** | Access control & authentication | AC (10), IA (6) |
+| **nist-audit-assessor** | Audit & accountability | AU (10) |
+| **nist-sc-assessor** | System & communications protection | SC (8) |
+| **nist-si-assessor** | System integrity & media protection | SI (7), MP (1) |
+| **nist-cm-assessor** | Configuration management & risk assessment | CM (6), RA (1) |
+| **nist-sa-assessor** | System acquisition & development | SA (4) |
 
 Each agent searches your code for specific patterns, reads the relevant files, and produces structured assessments with:
 
@@ -86,16 +108,17 @@ Each agent searches your code for specific patterns, reads the relevant files, a
 | Skill | Description |
 |-------|-------------|
 | **ISO 27001 Annex A** | Complete control definitions for all 93 controls with assessment criteria |
+| **NIST SP 800-53** | Control definitions and assessment criteria for all 53 shipped NIST controls |
 | **Evidence Generation** | Audit-ready evidence narrative methodology |
 | **Control Mapping** | Cross-standard mapping (ISO 27001 ↔ SOC 2 ↔ NIST 800-53 ↔ PCI DSS v4.0) |
 
 ## Output
 
-### State file (`.claude/shinsa-state.json`)
+### State file (`shinsa-output/shinsa-state.json`)
 
 Machine-readable assessment state with control statuses, maturity scores, finding counts, and agent completion tracking.
 
-### Report (`.claude/compliance-report.md`)
+### Report (`shinsa-output/compliance-report.md`)
 
 Human-readable compliance report with:
 - Executive summary
@@ -106,7 +129,7 @@ Human-readable compliance report with:
 
 ## Controls Assessed
 
-### Fully Code-Assessable (auto)
+### ISO 27001 Full-Scan Controls
 
 | Control | Name | Agent |
 |---------|------|-------|
@@ -123,6 +146,17 @@ Human-readable compliance report with:
 | A.8.24 | Use of cryptography | crypto-assessor |
 | A.8.34 | Protection during audit testing | logging-assessor |
 | A.5.14 | Information transfer | data-protection-assessor |
+
+### NIST SP 800-53 Full-Scan Coverage
+
+Shinsa currently ships 53 NIST SP 800-53 Rev 5 controls across these domains:
+
+- Access Control + Identification and Authentication: AC, IA
+- Audit and Accountability: AU
+- System and Communications Protection: SC
+- System and Information Integrity + Media Protection: SI, MP
+- Configuration Management + Risk Assessment: CM, RA
+- System Acquisition: SA
 
 ### Cross-Standard Mapping
 
@@ -145,26 +179,14 @@ Each finding maps to equivalent controls in other frameworks:
 | **Low** | Minor improvement opportunity | Suboptimal token lifetimes, verbose errors |
 | **Info** | Best practice suggestion | Library upgrade recommendations |
 
-## Pro Mode
+## Current Coverage
 
-Shinsa community edition covers ISO 27001 Annex A (free, open source).
+Shinsa currently ships native, source-based assessments for:
 
-**Pro mode** (coming soon) adds:
-- All 5 frameworks (ISO 27001, ISO 42001, SOC 2, NIST 800-53, PCI DSS v4.0)
-- Cross-standard deduplication (53 mappings)
-- All 14 assessment agents
-- PDF/HTML audit-ready reports
-- Multi-repo scanning
-- SOA management
-- Web dashboard
+- ISO 27001 Annex A
+- NIST SP 800-53 Rev 5
 
-To configure Pro mode, create `.claude/shinsa.local.md`:
-
-```yaml
----
-shinsa_api_key: your-api-key-here
----
-```
+The plugin also includes cross-standard mapping reference material for ISO 27001, SOC 2, NIST 800-53, and PCI DSS v4.0 so findings can be translated across frameworks when needed.
 
 ## E2E Verified
 

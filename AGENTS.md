@@ -7,7 +7,7 @@ An AI-first compliance assessment plugin that scans codebases against ISO 27001 
 ```
 shinsa-plugin/
 ├── .claude-plugin/plugin.json  # Plugin manifest
-├── CLAUDE.md                   # This file
+├── AGENTS.md                   # This file
 ├── commands/                   # Slash commands
 │   ├── compliance-scan.md      # /shinsa:compliance-scan — full ISO 27001 assessment
 │   ├── quick-check.md          # /shinsa:quick-check — fast ISO control check
@@ -37,9 +37,9 @@ shinsa-plugin/
 
 ## Key Commands
 
-- `/shinsa:compliance-scan` — Full ISO 27001 compliance assessment (4 domains, 13 controls)
-- `/shinsa:quick-check` — Fast check of a specific ISO 27001 control or family
-- `/shinsa:nist-scan` — Full NIST SP 800-53 Rev 5 compliance assessment (6 domains, 53 controls)
+- `/shinsa:compliance-scan` — Full ISO 27001 compliance assessment (4 domains, 13 shipped controls)
+- `/shinsa:quick-check` — Fast check of the supported ISO full-scan controls
+- `/shinsa:nist-scan` — Full NIST SP 800-53 Rev 5 compliance assessment (6 domains, 53 shipped controls)
 - `/shinsa:nist-quick-check` — Fast check of a specific NIST control or family
 
 ## Assessment Methodology

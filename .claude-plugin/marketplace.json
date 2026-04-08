@@ -1,0 +1,13 @@
+{
+  "name": "shinsa",
+  "owner": {
+    "name": "allsmog"
+  },
+  "plugins": [
+    {
+      "name": "shinsa",
+      "source": "./",
+      "description": "AI-first compliance assessment plugin for Claude Code. Scans codebases against ISO 27001 Annex A and NIST SP 800-53 Rev 5 with evidence-backed findings."
+    }
+  ]
+}
