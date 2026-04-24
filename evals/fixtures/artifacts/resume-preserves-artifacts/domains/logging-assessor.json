@@ -1,0 +1,41 @@
+{
+  "agent": "logging-assessor",
+  "standard": "iso27001",
+  "domain": "logging-monitoring-audit",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "A.8.15",
+      "title": "Logging",
+      "status": "partially_implemented",
+      "maturity": 3,
+      "confidence": 0.78,
+      "agent": "logging-assessor",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Log retention policy",
+        "SIEM ingestion evidence"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Fixture logging source anchor supports the control, while production retention evidence is not present.",
+      "evidence_quality_rationale": "Evidence is partial because code evidence is present and operational evidence is outstanding.",
+      "grc_action": "request_evidence",
+      "findings": [
+        {
+          "title": "Logging fixture anchor",
+          "severity": "info",
+          "description": "Fixture logger is used to validate source anchor resolution.",
+          "evidence": [
+            {
+              "file_path": "src/logger.ts",
+              "start_line": 1,
+              "assessment": "The logger fixture provides an anchor for resume validation."
+            }
+          ],
+          "recommendation": "Attach production logging evidence."
+        }
+      ]
+    }
+  ]
+}

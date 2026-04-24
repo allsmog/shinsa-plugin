@@ -157,6 +157,25 @@ grep -rniE "(elasticsearch|logstash|kibana|fluentd|fluentbit|cloudwatch|datadog|
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If code shows audit event generation but retention, SIEM, review cadence, or production access evidence is missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: Passwords or tokens logged in plaintext, no logging at all on authentication endpoints
@@ -172,6 +191,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### AU-2 — Event Logging
 **Status**: partially_implemented | **Maturity**: 2/5 | **Confidence**: 0.85
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Application files show some auditable events, but production retention and review evidence were not available.
+**Evidence Quality Rationale**: Source anchors prove event generation only for selected flows, not the full audit program.
+**Manual Evidence Items**: Audit log retention configuration; evidence of periodic log review
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/utils/logger.ts:5` — Winston configured with JSON format (PASS)
@@ -198,3 +222,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Containerized**: Log aggregation (ELK, Loki, Datadog) — check if configured
 - **Microservices**: Distributed tracing (Jaeger, Zipkin, OTEL) — check correlation IDs
 - **Third-party logging**: If using managed logging, check integration configuration
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "nist-audit-assessor"`
+- `standard = "nist-800-53"`
+- `domain = "audit-accountability"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/nist-audit-assessor.json` and `domains/nist-audit-assessor.md`.

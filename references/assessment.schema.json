@@ -1,13 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Shinsa Compliance Assessment",
-  "description": "Schema for compliance assessment output produced by Shinsa agents",
+  "description": "Schema for orchestrated compliance assessment output produced by Shinsa",
   "type": "object",
-  "required": ["schema_version", "assessment_id", "target", "standard", "completed_at", "summary", "controls"],
+  "required": [
+    "schema_version",
+    "assessment_id",
+    "target",
+    "standard",
+    "started_at",
+    "last_updated",
+    "completed_at",
+    "run",
+    "review",
+    "artifacts",
+    "summary",
+    "controls"
+  ],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.1.0"
+      "const": "1.4.0"
     },
     "assessment_id": {
       "type": "string",
@@ -19,15 +32,25 @@
     },
     "standard": {
       "type": "string",
-      "enum": ["iso27001", "nist-800-53"],
+      "enum": [
+        "iso27001",
+        "nist-800-53"
+      ],
       "description": "Compliance standard assessed"
     },
     "started_at": {
       "type": "string",
       "format": "date-time"
     },
-    "completed_at": {
+    "last_updated": {
       "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date-time"
     },
     "scope": {
@@ -35,42 +58,265 @@
       "properties": {
         "languages": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "frameworks": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "infrastructure": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "source_file_count": {
           "type": "integer"
         }
       }
     },
+    "run": {
+      "type": "object",
+      "required": [
+        "id",
+        "standard",
+        "mode",
+        "phase",
+        "round"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "standard": {
+          "type": "string",
+          "enum": [
+            "iso27001",
+            "nist-800-53"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "full-scan",
+            "quick-check"
+          ]
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "scope",
+            "plan",
+            "assessment",
+            "review",
+            "reconciliation",
+            "synthesis",
+            "completed"
+          ]
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resumed_from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "agents_completed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reviewers_completed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": [
+        "status",
+        "rounds"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "changes_requested",
+            "unresolved"
+          ]
+        },
+        "rounds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "round",
+              "angle",
+              "status"
+            ],
+            "properties": {
+              "round": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "angle": {
+                "type": "string",
+                "enum": [
+                  "evidence_completeness",
+                  "control_interpretation",
+                  "coverage_false_negative_risk"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "approved",
+                  "changes_requested",
+                  "unresolved"
+                ]
+              },
+              "affected_controls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "requested_changes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "notes": {
+                "type": "string"
+              },
+              "artifact_path": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "run_root",
+        "scope_path",
+        "plan_path",
+        "domain_results",
+        "review_paths",
+        "report_path"
+      ],
+      "properties": {
+        "run_root": {
+          "type": "string"
+        },
+        "scope_path": {
+          "type": "string"
+        },
+        "plan_path": {
+          "type": "string"
+        },
+        "applicability_path": {
+          "type": "string"
+        },
+        "domain_results": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "report_path": {
+          "type": "string"
+        }
+      }
+    },
     "summary": {
       "type": "object",
-      "required": ["controls_assessed", "implemented", "partially_implemented", "not_implemented", "not_applicable", "compliance_percentage", "average_maturity", "findings"],
+      "required": [
+        "controls_assessed",
+        "implemented",
+        "partially_implemented",
+        "not_implemented",
+        "not_applicable",
+        "compliance_percentage",
+        "average_maturity",
+        "findings"
+      ],
       "properties": {
-        "controls_assessed": { "type": "integer" },
-        "implemented": { "type": "integer" },
-        "partially_implemented": { "type": "integer" },
-        "not_implemented": { "type": "integer" },
-        "not_applicable": { "type": "integer" },
-        "compliance_percentage": { "type": "number", "minimum": 0, "maximum": 100 },
-        "average_maturity": { "type": "number", "minimum": 1, "maximum": 5 },
+        "controls_assessed": {
+          "type": "integer"
+        },
+        "implemented": {
+          "type": "integer"
+        },
+        "partially_implemented": {
+          "type": "integer"
+        },
+        "not_implemented": {
+          "type": "integer"
+        },
+        "not_applicable": {
+          "type": "integer"
+        },
+        "compliance_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "average_maturity": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
         "findings": {
           "type": "object",
-          "required": ["total", "critical", "high", "medium", "low", "info"],
+          "required": [
+            "total",
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "info"
+          ],
           "properties": {
-            "total": { "type": "integer" },
-            "critical": { "type": "integer" },
-            "high": { "type": "integer" },
-            "medium": { "type": "integer" },
-            "low": { "type": "integer" },
-            "info": { "type": "integer" }
+            "total": {
+              "type": "integer"
+            },
+            "critical": {
+              "type": "integer"
+            },
+            "high": {
+              "type": "integer"
+            },
+            "medium": {
+              "type": "integer"
+            },
+            "low": {
+              "type": "integer"
+            },
+            "info": {
+              "type": "integer"
+            }
           }
         }
       }
@@ -79,24 +325,78 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["control_id", "title", "status", "maturity", "confidence", "agent"],
+        "required": [
+          "control_id",
+          "title",
+          "status",
+          "maturity",
+          "confidence",
+          "agent",
+          "evidence_quality",
+          "manual_evidence_needed",
+          "manual_evidence_items",
+          "reviewer_disposition",
+          "confidence_rationale",
+          "evidence_quality_rationale",
+          "grc_action"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "manual_evidence_needed": {
+                  "const": true
+                }
+              },
+              "required": [
+                "manual_evidence_needed"
+              ]
+            },
+            "then": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "partially_implemented",
+                    "not_implemented",
+                    "not_applicable",
+                    "not_assessed"
+                  ]
+                },
+                "manual_evidence_items": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ],
         "properties": {
           "control_id": {
             "type": "string",
             "description": "Control identifier. ISO format: A.X.X, NIST format: XX-N",
             "oneOf": [
-              { "pattern": "^A\\.[5-8]\\.\\d{1,2}$" },
-              { "pattern": "^(AC|AU|AT|CA|CM|CP|IA|IR|MA|MP|PE|PL|PM|PS|PT|RA|SA|SC|SI|SR)-\\d{1,2}$" }
+              {
+                "pattern": "^A\\.[5-8]\\.\\d{1,2}$"
+              },
+              {
+                "pattern": "^(AC|AU|AT|CA|CM|CP|IA|IR|MA|MP|PE|PL|PM|PS|PT|RA|SA|SC|SI|SR)-\\d{1,2}$"
+              }
             ]
           },
           "control_family": {
-            "type": "string",
-            "description": "Control family identifier (e.g., AC, AU, SC for NIST; A.8 for ISO)"
+            "type": "string"
           },
-          "title": { "type": "string" },
+          "title": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
-            "enum": ["implemented", "partially_implemented", "not_implemented", "not_applicable", "not_assessed"]
+            "enum": [
+              "implemented",
+              "partially_implemented",
+              "not_implemented",
+              "not_applicable",
+              "not_assessed"
+            ]
           },
           "maturity": {
             "type": "integer",
@@ -108,46 +408,147 @@
             "minimum": 0,
             "maximum": 1
           },
-          "agent": { "type": "string" },
-          "evidence_summary": { "type": "string" },
+          "agent": {
+            "type": "string"
+          },
+          "evidence_summary": {
+            "type": "string"
+          },
+          "evidence_quality": {
+            "type": "string",
+            "enum": [
+              "strong",
+              "partial",
+              "inferred",
+              "missing"
+            ]
+          },
+          "manual_evidence_needed": {
+            "type": "boolean"
+          },
+          "manual_evidence_items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "reviewer_disposition": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "changes_requested",
+              "unresolved",
+              "not_reviewed"
+            ]
+          },
+          "confidence_rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_quality_rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grc_action": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "reject",
+              "request_evidence",
+              "create_remediation_ticket"
+            ]
+          },
+          "finding_count": {
+            "type": "integer"
+          },
+          "review_notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "findings": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["title", "severity", "description", "recommendation"],
+              "required": [
+                "title",
+                "severity",
+                "description",
+                "evidence",
+                "recommendation"
+              ],
               "properties": {
-                "title": { "type": "string" },
+                "title": {
+                  "type": "string"
+                },
                 "severity": {
                   "type": "string",
-                  "enum": ["critical", "high", "medium", "low", "info"]
+                  "enum": [
+                    "critical",
+                    "high",
+                    "medium",
+                    "low",
+                    "info"
+                  ]
                 },
-                "description": { "type": "string" },
+                "description": {
+                  "type": "string"
+                },
                 "evidence": {
                   "type": "array",
+                  "minItems": 1,
                   "items": {
                     "type": "object",
-                    "required": ["file_path", "start_line", "assessment"],
+                    "required": [
+                      "file_path",
+                      "start_line",
+                      "assessment"
+                    ],
                     "properties": {
-                      "file_path": { "type": "string" },
-                      "start_line": { "type": "integer" },
-                      "end_line": { "type": "integer" },
-                      "snippet": { "type": "string" },
-                      "assessment": { "type": "string" }
+                      "file_path": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "start_line": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "end_line": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "snippet": {
+                        "type": "string"
+                      },
+                      "assessment": {
+                        "type": "string",
+                        "minLength": 1
+                      }
                     }
                   }
                 },
-                "gap": { "type": "string" },
-                "recommendation": { "type": "string" }
+                "gap": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                }
               }
             }
           },
           "gaps": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           },
           "recommendations": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

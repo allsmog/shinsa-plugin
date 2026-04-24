@@ -1,0 +1,41 @@
+{
+  "agent": "nist-cm-assessor",
+  "standard": "nist-800-53",
+  "domain": "configuration-management-risk-assessment",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "CM-6",
+      "title": "Configuration Settings",
+      "status": "partially_implemented",
+      "maturity": 2,
+      "confidence": 0.76,
+      "agent": "nist-cm-assessor",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Approved baseline configuration",
+        "Production runtime configuration export"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Fixture Dockerfile evidence supports a configuration finding, but baseline approval is outside the fixture.",
+      "evidence_quality_rationale": "Evidence is partial because repository configuration is present and production configuration evidence is missing.",
+      "grc_action": "request_evidence",
+      "findings": [
+        {
+          "title": "Container configuration requires review",
+          "severity": "medium",
+          "description": "Fixture Dockerfile is a source anchor for CM-6 validation.",
+          "evidence": [
+            {
+              "file_path": "Dockerfile",
+              "start_line": 1,
+              "assessment": "Fixture Dockerfile provides a configuration evidence anchor."
+            }
+          ],
+          "recommendation": "Attach approved baseline configuration."
+        }
+      ]
+    }
+  ]
+}

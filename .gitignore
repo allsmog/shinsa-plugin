@@ -9,6 +9,10 @@ Thumbs.db
 *.swo
 *~
 
+# Python
+__pycache__/
+*.pyc
+
 # Plugin output (generated per-project, not part of the plugin)
 shinsa-output/
 

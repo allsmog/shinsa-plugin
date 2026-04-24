@@ -1,0 +1,34 @@
+{
+  "agent": "nist-si-assessor",
+  "standard": "nist-800-53",
+  "domain": "system-integrity-media-protection",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "SI-10",
+      "control_family": "SI",
+      "title": "Information Input Validation",
+      "status": "implemented",
+      "maturity": 3,
+      "confidence": 0.82,
+      "agent": "nist-si-assessor",
+      "evidence_summary": "Server input validation rejects invalid payloads and overlong values in the assessed route.",
+      "evidence_quality": "strong",
+      "manual_evidence_needed": false,
+      "manual_evidence_items": [],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "The assessed code path contains direct validation logic and no manual evidence is needed for this code-level control outcome.",
+      "evidence_quality_rationale": "Evidence is strong because the source anchor directly supports the validation claim for the scoped route.",
+      "grc_action": "accept",
+      "findings": [],
+      "gaps": [],
+      "recommendations": [
+        "Keep validation tests current as routes change"
+      ]
+    }
+  ],
+  "summary": {
+    "controls_assessed": 1,
+    "findings_total": 0
+  }
+}

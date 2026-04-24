@@ -1,6 +1,6 @@
 ---
 name: compliance-scan
-description: Run a full ISO 27001 Annex A compliance assessment against the codebase with all 4 assessment agents
+description: Run an orchestrated ISO 27001 Annex A compliance assessment with parallel domain assessors, cold review rounds, and durable artifacts
 argument-hint: "[path] [--controls A.8.5,A.8.24] [--family A.8] [--severity critical,high] [--format json|md] [--output file] [--resume]"
 allowed-tools:
   - Bash
@@ -15,239 +15,245 @@ allowed-tools:
 
 # Compliance Scan
 
-Run a full ISO 27001 Annex A compliance assessment with evidence-backed findings.
+Run a full ISO 27001:2022 Annex A assessment as a durable orchestration pipeline.
 
-**Persistence rule**: Write artifacts to disk incrementally. Use the Write tool to save `shinsa-output/shinsa-state.json` after each agent completes (not only at the end). Write `shinsa-output/compliance-report.md` as the final step. This ensures partial runs still produce usable output.
+This command is the orchestrator. Domain reasoning belongs in the assessor agents. Review belongs in fresh reviewer agents. Persist every phase to disk.
+
+Reference the shared contract in `references/orchestration-contract.md`.
 
 ## Flags
 
 | Flag | Effect |
 |------|--------|
-| `--controls` | Assess specific controls only (comma-separated IDs, e.g., `A.8.5,A.8.24`) |
-| `--family` | Assess the supported shipped controls within a family (`A.5` or `A.8`) |
-| `--severity` | Only report findings at or above severity (e.g., `--severity high`) |
+| `--controls` | Assess specific shipped controls only (comma-separated IDs, e.g. `A.8.5,A.8.24`) |
+| `--family` | Assess shipped controls within a family (`A.5` or `A.8`) |
+| `--severity` | Only report findings at or above severity |
 | `--format` | Output format: `json` or `md` (default: both) |
-| `--output` | Save report to a specific file path |
-| `--resume` | Resume from a previous incomplete assessment |
+| `--output` | Save the final markdown report to a specific file path |
+| `--resume` | Resume the latest incomplete ISO orchestration run |
 
-## Step 1: Check for prior state
+## Shipped ISO Coverage
 
-Check if a previous assessment exists:
+The full scan produces standalone scored results for:
+
+- A.8.2
+- A.8.3
+- A.8.5
+- A.8.10
+- A.8.11
+- A.8.12
+- A.8.15
+- A.8.16
+- A.8.17
+- A.8.21
+- A.8.24
+- A.8.34
+- A.5.14
+
+Additional ISO guidance in the reference skill may inform analysis, but do not emit standalone scores for unshipped controls.
+
+## Phase 0: Initialize or Resume the Run
+
+1. Determine the target path. Default to the current directory.
+2. Discover candidate state files:
+
+   ```bash
+   find shinsa-output -path "*/shinsa-state.json" -type f 2>/dev/null
+   ```
+
+3. If `--resume` is set:
+   - Load each candidate state JSON.
+   - Keep only states where `standard = "iso27001"` and `run.phase != "completed"`.
+   - Choose the candidate with the highest parseable `last_updated`; if `last_updated` is missing or invalid, fall back to file modification time.
+   - Continue from that run's recorded `run.phase` and `run.round`.
+   - If no incomplete ISO run exists, report that `--resume` has no target and stop without creating a new run.
+4. Otherwise create a new `assessment_id` and run root:
+
+   ```text
+   shinsa-output/runs/<assessment_id>/
+   ```
+
+5. Initialize `shinsa-output/runs/<assessment_id>/shinsa-state.json` immediately and mirror it to `shinsa-output/shinsa-state.json`.
+
+## Phase 1: Scope the Repository
+
+Detect languages, frameworks, infrastructure, and source size:
 
 ```bash
-ls shinsa-output/shinsa-state.json 2>/dev/null || true
+ls package.json pyproject.toml requirements.txt go.mod Cargo.toml pom.xml composer.json Gemfile 2>/dev/null || true
+ls Dockerfile docker-compose.yml .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile terraform/*.tf k8s/*.yaml 2>/dev/null || true
+find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.php" -o -name "*.rb" -o -name "*.rs" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/vendor/*" -not -path "*/dist/*" 2>/dev/null | wc -l
 ```
 
-If `--resume` is passed and state exists, load it and skip completed agents. Otherwise start fresh.
+Write `scope.md` with:
 
-## Step 2: Scope the codebase
+- target path
+- detected languages
+- detected frameworks
+- detected infrastructure
+- source file count
+- any obvious scoping caveats
 
-Identify the repository structure, languages, and frameworks:
+Update state:
 
-1. **Language detection** — Check file extensions and package manifests:
-   ```bash
-   ls package.json pyproject.toml requirements.txt go.mod Cargo.toml pom.xml composer.json Gemfile 2>/dev/null || true
+- `run.phase = "scope"`
+- `run.round = 1`
+- `scope = ...`
+
+## Phase 2: Write the Assessment Plan
+
+Create:
+
+- `assessment-plan.md`
+- `applicability.json`
+- `applicability.md`
+
+The assessment plan must include:
+
+1. target and standard
+2. requested filters
+3. active ISO controls after filtering
+4. domain-to-agent dispatch plan
+5. reviewer angles
+6. reconciliation rules
+
+Use this domain mapping:
+
+- `auth-assessor`: A.8.2, A.8.3, A.8.5
+- `crypto-assessor`: A.8.21, A.8.24
+- `data-protection-assessor`: A.8.10, A.8.11, A.8.12, A.5.14
+- `logging-assessor`: A.8.15, A.8.16, A.8.17, A.8.34
+
+Update state:
+
+- `run.phase = "plan"`
+- `artifacts.plan_path = "shinsa-output/runs/<assessment_id>/assessment-plan.md"`
+
+## Phase 3: Dispatch Domain Assessors in Parallel
+
+Run the 4 domain assessors in parallel where the filtered scope still requires them.
+
+For each assessor:
+
+1. Provide only the target path, `scope.md`, `assessment-plan.md`, and the relevant active controls.
+2. Instruct the assessor to return:
+   - one JSON object matching the domain result contract
+   - one markdown summary
+3. Write the results to:
+   - `domains/<agent-name>.json`
+   - `domains/<agent-name>.md`
+4. After each domain completes, merge its controls and findings into `shinsa-state.json`, then mirror the state to `shinsa-output/shinsa-state.json`.
+
+Do not ask the orchestrator itself to perform inline control assessment. The agents own domain reasoning.
+
+Update state:
+
+- `run.phase = "assessment"`
+- `agents_completed = [...]`
+- `artifacts.domain_results = [...]`
+
+## Phase 4: Cold Review Round
+
+Run three fresh reviewers against the persisted artifacts only:
+
+- `evidence-completeness-reviewer`
+- `control-interpretation-reviewer`
+- `coverage-reviewer`
+
+Rules:
+
+1. Give reviewers the codebase plus persisted artifacts, not assessor reasoning.
+2. Reviewers must inspect `assessment-plan.md`, `scope.md`, `applicability.*`, and all current domain result artifacts.
+3. Persist outputs under:
+
+   ```text
+   reviews/round-<n>/evidence-completeness.json
+   reviews/round-<n>/evidence-completeness.md
+   reviews/round-<n>/control-interpretation.json
+   reviews/round-<n>/control-interpretation.md
+   reviews/round-<n>/coverage-review.json
+   reviews/round-<n>/coverage-review.md
    ```
 
-2. **Framework detection** — Identify web frameworks, ORMs, auth libraries:
-   - Read the primary package manifest
-   - Note frameworks that affect control assessment (e.g., Express implies Node.js auth patterns)
+4. Merge reviewer results into `review.rounds`.
 
-3. **Architecture detection** — Check for infrastructure-as-code, CI/CD, Docker:
-   ```bash
-   ls Dockerfile docker-compose.yml .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile terraform/*.tf k8s/*.yaml 2>/dev/null || true
-   ```
+Update state:
 
-4. **Size check** — Count source files:
-   ```bash
-   find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.php" -o -name "*.rb" -o -name "*.rs" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/vendor/*" -not -path "*/dist/*" 2>/dev/null | wc -l
-   ```
+- `run.phase = "review"`
+- `review.rounds += current round`
+- `artifacts.review_paths += current round files`
 
-Record the scope in a brief summary for agent context.
+## Phase 5: Reconciliation Loop
 
-## Step 3: Determine applicable controls
+If every reviewer returns `approved`, continue to synthesis.
 
-Based on scope, determine which ISO 27001 Annex A controls are scored by the shipped full scan:
+If any reviewer returns `changes_requested`:
 
-**Shipped full-scan coverage**:
-- A.8.2 (Privileged access rights)
-- A.8.3 (Information access restriction)
-- A.8.5 (Secure authentication)
-- A.8.10 (Information deletion)
-- A.8.11 (Data masking)
-- A.8.12 (Data leakage prevention)
-- A.8.15 (Logging)
-- A.8.16 (Monitoring activities)
-- A.8.17 (Clock synchronization)
-- A.8.21 (Security of network services)
-- A.8.24 (Use of cryptography)
-- A.8.34 (Protection of information systems during audit testing)
-- A.5.14 (Information transfer)
+1. Collect requested changes by affected domain.
+2. Re-run only the impacted domain assessors.
+3. Write new domain artifacts in place.
+4. Increment `run.round`.
+5. Re-run all three reviewers on the updated artifact set.
 
-**Reference-only ISO guidance**:
-- The ISO reference skill also documents additional conditional and adjacent controls such as A.8.9, A.8.25, A.8.28, and A.8.31.
-- Use those as supporting context during analysis, but the shipped full scan currently produces standalone scored results only for the 13 controls above.
+Maximum rounds: 3.
 
-If `--controls` or `--family` is specified, filter to the shipped full-scan controls above only. If the user requests another ISO control, explain that the reference skill includes guidance for it but the shipped full scan does not currently score it as a standalone result.
+If any reviewer is still non-approved after round 3:
 
-## Step 4: Assess controls and persist incrementally
+- set `review.status = "unresolved"`
+- carry forward the unresolved requests
+- tag the final markdown report with `[REVIEWER NOTE: unresolved]`
 
-**CRITICAL: Do NOT dispatch subagents for assessment. Perform the assessment INLINE to avoid subagent startup overhead. Assess each control domain in order, and IMMEDIATELY write the updated state file to `shinsa-output/shinsa-state.json` after each domain before proceeding to the next.**
+Otherwise set `review.status = "approved"`.
 
-**For each domain, do the assessment yourself (do not use the Agent tool):**
+During reconciliation set:
 
-### Domain 1: Authentication & Access Control (A.8.2, A.8.3, A.8.5)
-Search for auth implementations using Grep/Glob, read the relevant files, assess against the control requirements. Look for:
-- Password hashing algorithms, session management, JWT handling
-- Authorization middleware, RBAC, route protection
-- Rate limiting, account lockout
+- `run.phase = "reconciliation"`
 
-**After assessing, IMMEDIATELY use Write tool to save `shinsa-output/shinsa-state.json` with auth results.**
+## Phase 6: Final Synthesis
 
-### Domain 2: Cryptography (A.8.24, A.8.21)
-Search for crypto usage, TLS config, key management. Look for:
-- Algorithm choices, hardcoded keys, encryption modes
-- TLS/SSL configuration, certificate validation
+Synthesize the final report from persisted artifacts only. Do not re-scan the codebase in this phase.
 
-**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with crypto results added.**
+Write:
 
-### Domain 3: Data Protection (A.8.10, A.8.11, A.8.12, A.5.14)
-Search for data handling, masking, leakage prevention. Look for:
-- PII in logs, error message sanitization, input validation
-- Data deletion, masking in API responses, security headers
+- `shinsa-output/runs/<assessment_id>/synthesis/compliance-report.md`
+- `shinsa-output/runs/<assessment_id>/synthesis/evidence-index.json`
+- `shinsa-output/runs/<assessment_id>/synthesis/control-matrix.json`
+- `shinsa-output/runs/<assessment_id>/compliance-report.md`
+- `shinsa-output/compliance-report.md`
 
-**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with data protection results added.**
+The canonical `synthesis/compliance-report.md` is an enterprise evidence pack and must include:
 
-### Domain 4: Logging & Monitoring (A.8.15, A.8.16, A.8.17, A.8.34)
-Search for logging config, monitoring, audit trails. Look for:
-- Structured logging, security event coverage, sensitive data exclusion
-- Health checks, metrics, timestamp handling
+1. `Assessment Metadata`
+2. `Executive Summary`
+3. `Control Matrix`
+4. `Findings`
+5. `Evidence Index`
+6. `Reviewer Notes`
+7. `Unresolved Risks`
+8. `Limitations`
+9. `What To Do Next`
+10. `Human Sign-Off`
 
-**After assessing, IMMEDIATELY use Write tool to update `shinsa-output/shinsa-state.json` with logging results added.**
+Assessment metadata must include timestamp, plugin version, target path, target commit placeholder or commit hash, assessment mode, standards, scope exclusions, methodology, and raw artifact references.
 
-## Step 5: Final state update
+Every assessed control must show status, confidence, `confidence_rationale`, evidence quality (`strong`, `partial`, `inferred`, or `missing`), `evidence_quality_rationale`, whether manual evidence is needed, `manual_evidence_items`, reviewer disposition, evidence paths, remediation priority, and `grc_action`.
 
-After all 4 domains are assessed, read `shinsa-output/shinsa-state.json` from disk, compute final summary, and write the completed state. The state file should already contain all control assessments from incremental writes — just update `completed_at` and the final summary totals.
+The final state must include:
 
-**How to write**: Use `mkdir -p shinsa-output && cat > shinsa-output/shinsa-state.json << 'JSONEOF'` via Bash.
+- `run`
+- `review`
+- `artifacts`
+- merged `scope`
+- merged `summary`
+- merged `controls`
 
-## State file schema
+Mirror the final run state to:
 
-`shinsa-output/shinsa-state.json`:
+- `shinsa-output/runs/<assessment_id>/shinsa-state.json`
+- `shinsa-output/shinsa-state.json`
 
-```json
-{
-  "schema_version": "1.1.0",
-  "assessment_id": "<unique-id>",
-  "target": "<project-path>",
-  "standard": "iso27001",
-  "started_at": "<ISO-8601>",
-  "last_updated": "<ISO-8601>",
-  "completed_at": "<ISO-8601 or null>",
-  "scope": {
-    "languages": ["typescript"],
-    "frameworks": ["express"],
-    "infrastructure": ["docker", "github-actions"],
-    "source_file_count": 150
-  },
-  "agents_completed": ["auth-assessor", "crypto-assessor", "data-protection-assessor", "logging-assessor"],
-  "summary": {
-    "controls_assessed": 13,
-    "implemented": 8,
-    "partially_implemented": 2,
-    "not_implemented": 2,
-    "not_applicable": 1,
-    "compliance_percentage": 75,
-    "average_maturity": 3.2,
-    "findings": {
-      "total": 5,
-      "critical": 1,
-      "high": 2,
-      "medium": 1,
-      "low": 1,
-      "info": 0
-    }
-  },
-  "controls": [
-    {
-      "control_id": "A.8.5",
-      "control_family": "A.8",
-      "title": "Secure authentication",
-      "status": "partially_implemented",
-      "maturity": 3,
-      "confidence": 0.85,
-      "agent": "auth-assessor",
-      "finding_count": 2
-    }
-  ]
-}
-```
+If `--output` is set, also write the markdown report there.
 
-## Step 6: Generate report (from state file only)
+## Final Output Expectations
 
-**IMPORTANT: Generate the report by reading `shinsa-output/shinsa-state.json` from disk. Do NOT re-read or re-analyze the codebase.** The state file already contains all control assessments, findings, maturity scores, and evidence. Just format it as markdown.
-
-Write human-readable report to `shinsa-output/compliance-report.md` using `cat > shinsa-output/compliance-report.md << 'REPORTEOF'` via Bash:
-
-```markdown
-# ISO 27001 Annex A Compliance Assessment
-
-**Target**: <project-path>
-**Date**: <ISO-8601>
-**Standard**: ISO/IEC 27001:2022 Annex A
-
-## Executive Summary
-
-<2-3 sentences summarizing compliance posture>
-
-## Compliance Overview
-
-| Metric | Value |
-|--------|-------|
-| Controls Assessed | X |
-| Implemented | X (Y%) |
-| Partially Implemented | X (Y%) |
-| Not Implemented | X (Y%) |
-| Average Maturity | X.X / 5 |
-
-## Critical & High Findings
-
-### [FINDING-001] <title>
-- **Control**: A.X.X — <control name>
-- **Severity**: critical/high
-- **Status**: not_implemented / partially_implemented
-- **Evidence**:
-  - `<file>:<line>` — <code snippet>
-  - <assessment rationale>
-- **Gap**: <what's missing>
-- **Recommendation**: <how to fix>
-
-## All Control Assessments
-
-| Control | Name | Status | Maturity | Findings |
-|---------|------|--------|----------|----------|
-| A.8.2 | Privileged access rights | implemented | 4/5 | 0 |
-| A.8.5 | Secure authentication | partial | 3/5 | 2 |
-| ... | ... | ... | ... | ... |
-
-## Recommendations (Prioritized)
-
-1. <Most critical recommendation>
-2. <Next priority>
-3. ...
-```
-
-## Step 7: Emit requested format
-
-### `--format json`
-Output the full assessment as structured JSON (all control assessments with findings and evidence).
-
-### `--format md` (default)
-Display the compliance report summary in the conversation. Reference `shinsa-output/compliance-report.md` for the full report.
-
-## Notes
-
-- Every finding MUST include file path, line numbers, and code snippet as evidence
-- Confidence below 0.5 should be flagged as "low confidence — manual review recommended"
-- Controls that cannot be assessed from code alone (A.5 organizational, A.6 people, A.7 physical) are marked `not_applicable` with a note explaining they require manual evidence
-- The assessment is advisory — it does not replace a formal ISO 27001 audit
+The completed state must use schema version `1.4.0` and include review provenance, evidence quality, manual-evidence markers, confidence/evidence-quality rationales, GRC action, and reviewer disposition. The compatibility report remains human-readable, but the canonical source of truth is the artifact set under `shinsa-output/runs/<assessment_id>/`.

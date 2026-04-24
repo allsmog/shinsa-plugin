@@ -21,6 +21,10 @@ Comprehensive reference for code-assessable NIST SP 800-53 Rev 5 controls. This 
 - When answering questions about NIST 800-53 requirements
 - When mapping findings between NIST and other compliance frameworks
 
+## Orchestration Note
+
+This skill is reference material, not the orchestrator. The command files own run planning, assessor dispatch, reviewer loops, and artifact persistence.
+
 ## Control Families
 
 NIST SP 800-53 Rev 5 organizes controls into 20 families:

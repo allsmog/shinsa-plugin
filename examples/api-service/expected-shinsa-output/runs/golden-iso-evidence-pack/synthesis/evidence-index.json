@@ -1,0 +1,5 @@
+[
+  {"control_id":"A.8.5","file_path":"src/auth/password.ts","start_line":4,"evidence_quality":"strong"},
+  {"control_id":"A.8.5","file_path":"src/routes/auth.ts","start_line":7,"evidence_quality":"partial"},
+  {"control_id":"A.8.15","file_path":"src/routes/admin.ts","start_line":5,"evidence_quality":"partial"}
+]

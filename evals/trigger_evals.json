@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "trigger-iso-full",
+      "query": "Run a full ISO 27001 assessment against this repo.",
+      "should_trigger": true,
+      "target": "compliance-scan"
+    },
+    {
+      "id": "trigger-nist-quick",
+      "query": "Check AC-3 for this service.",
+      "should_trigger": true,
+      "target": "nist-quick-check"
+    },
+    {
+      "id": "trigger-maintainer-plan",
+      "query": "Plan how to add ISO A.8.28 coverage to the plugin.",
+      "should_trigger": true,
+      "target": "control-plan"
+    },
+    {
+      "id": "trigger-maintainer-implement",
+      "query": "Implement the approved add-si-16-hardening plan in Shinsa.",
+      "should_trigger": true,
+      "target": "control-implement"
+    },
+    {
+      "id": "ignore-general-chat",
+      "query": "Explain ISO 27001 in plain English.",
+      "should_trigger": false,
+      "target": "none"
+    },
+    {
+      "id": "ignore-unrelated-debugging",
+      "query": "Fix this React hydration bug.",
+      "should_trigger": false,
+      "target": "none"
+    }
+  ]
+}

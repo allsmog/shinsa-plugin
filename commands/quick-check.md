@@ -1,178 +1,146 @@
 ---
 name: quick-check
-description: Fast compliance check of a specific ISO 27001 control or control family against the codebase
+description: Orchestrated ISO quick check of a specific control or family with durable artifacts and a cold review pass
 argument-hint: "<control-id|family> [path] [--verbose]"
 allowed-tools:
+  - Bash
   - Glob
   - Grep
   - Read
+  - Write
+  - Agent
   - TodoWrite
+  - AskUserQuestion
 ---
 
 # Quick Check
 
-Fast, focused compliance check against a single ISO 27001 control or control family.
+Run a focused ISO quick check using one domain assessor plus one condensed cold review.
 
-## Usage
+Reference the shared contract in `references/orchestration-contract.md`.
 
-```
-/shinsa:quick-check A.8.5              # Check secure authentication
-/shinsa:quick-check A.8.24             # Check cryptography
-/shinsa:quick-check A.8                # Check all supported ISO scan controls
-/shinsa:quick-check A.8.15 src/        # Check logging in specific path
-/shinsa:quick-check A.8.5 --verbose    # Detailed output with all evidence
-```
+## Scope Rules
 
-## Flags
+Supported ISO quick-check controls:
 
-| Flag | Effect |
-|------|--------|
-| `--verbose` | Show all evidence including passing checks, not just findings |
+- A.8.2
+- A.8.3
+- A.8.5
+- A.8.10
+- A.8.11
+- A.8.12
+- A.8.15
+- A.8.16
+- A.8.17
+- A.8.21
+- A.8.24
+- A.8.34
+- A.5.14
 
-## Step 1: Parse the control target
+If the user requests another ISO control, explain that the reference skill contains broader guidance but the shipped quick-check command scores only the controls above.
 
-Determine what to check:
-- **Single control** (e.g., `A.8.5`): Look up the control definition from the iso-27001-annex-a skill
-- **Control family** (e.g., `A.8`): Look up all supported shipped quick-check controls in that family
+## Workflow
 
-If the control ID is not recognized, suggest the closest match.
+### Phase 1: Resolve the Target
 
-**Current shipped ISO quick-check coverage**: A.8.2, A.8.3, A.8.5, A.8.10, A.8.11, A.8.12, A.8.15, A.8.16, A.8.17, A.8.21, A.8.24, A.8.34, and A.5.14.
+1. Parse the requested control or family.
+2. Map it to the responsible domain assessor:
+   - `auth-assessor`
+   - `crypto-assessor`
+   - `data-protection-assessor`
+   - `logging-assessor`
+3. Create a run directory under `shinsa-output/runs/<assessment_id>/`.
 
-If the user requests another ISO control, explain that the ISO reference skill includes broader Annex A guidance, but the shipped quick-check command currently scores only the supported controls listed above.
+### Phase 2: Scope and Plan
 
-## Step 2: Quick scope
+Write:
 
-Identify the target path (default: current directory). Do a fast language detection:
+- `scope.md`
+- `assessment-plan.md`
+- `applicability.json`
+- `applicability.md`
 
-```bash
-{ ls package.json pyproject.toml go.mod Cargo.toml pom.xml 2>/dev/null || true; } | head -1
-```
+The plan must record:
 
-## Step 3: Targeted assessment
+- requested control(s)
+- target path
+- responsible assessor
+- cold review rule for disagreement handling
 
-For the specific control(s), perform a focused search:
+Initialize `shinsa-state.json` with:
 
-### A.8.5 — Secure Authentication
-Search for auth implementations and check:
-- Password hashing algorithm (bcrypt/scrypt/Argon2 = pass, MD5/SHA1 = fail)
-- MFA implementation
-- Session management (token expiry, secure flags)
-- Rate limiting on login endpoints
-- Account lockout mechanisms
+- `run.mode = "quick-check"`
+- `run.phase = "plan"`
+- `run.round = 1`
 
-### A.8.24 — Use of Cryptography
-Search for crypto usage and check:
-- Algorithm choices (AES-256 = pass, DES/RC4 = fail)
-- Key management (hardcoded keys = critical finding)
-- TLS configuration (TLS 1.2+ required)
-- Encryption mode (GCM/CTR = pass, ECB = fail)
-- IV/nonce generation (crypto.randomBytes = pass, Math.random = fail)
+### Phase 3: Assess
 
-### A.8.15 — Logging
-Search for logging configuration and check:
-- Structured logging (JSON format preferred)
-- Security event coverage (auth, access control, errors)
-- Sensitive data exclusion (passwords, tokens not in logs)
-- Log level configuration
-- Timestamp format (ISO 8601 with timezone)
+Dispatch the responsible ISO domain assessor with the scoped controls only.
 
-### A.8.2 — Privileged Access Rights
-Search for authorization and check:
-- RBAC or permission system
-- Privilege separation (admin vs user roles)
-- Principle of least privilege
-- Privilege escalation protections
+Persist the result to:
 
-### A.8.3 — Information Access Restriction
-Search for access control and check:
-- Route/endpoint protection
-- Authorization middleware
-- Resource-level access checks
-- API key/token scoping
+- `domains/<agent-name>.json`
+- `domains/<agent-name>.md`
 
-### A.8.10 — Information Deletion
-Search for data lifecycle and check:
-- Soft delete vs hard delete
-- Data retention policies
-- Secure deletion (overwrite)
-- Cascading deletes
+Merge the returned controls and findings into the run state.
 
-### A.8.11 — Data Masking
-Search for data display and check:
-- PII masking in logs
-- Masked fields in API responses
-- Redacted data in error messages
-- Display truncation of sensitive fields
+### Phase 4: Condensed Cold Review
 
-### A.8.12 — Data Leakage Prevention
-Search for data exposure and check:
-- Input validation
-- Output encoding
-- Error message sanitization
-- Stack trace suppression in production
-- Sensitive headers (X-Powered-By removed)
+Run one fresh reviewer cold. Use `control-interpretation-reviewer` unless the orchestrator has a stronger reason to choose another reviewer.
 
-### A.8.16 — Monitoring Activities
-Search for monitoring and check:
-- Health check endpoints
-- Metrics collection (Prometheus, Datadog, etc.)
-- Alerting configuration
-- APM integration
+The quick-check reviewer must examine:
 
-### A.8.17 — Clock Synchronization
-Search for timestamp handling and check:
-- UTC usage
-- ISO 8601 format
-- NTP configuration (if infrastructure code exists)
+- evidence sufficiency
+- control interpretation
+- obvious false-negative risk within the narrow scope
 
-### A.8.21 — Security of Network Services
-Search for network configuration and check:
-- TLS/SSL setup
-- Certificate validation
-- CORS configuration
-- Helmet/security headers
+Persist the result under `reviews/round-1/`.
 
-### A.5.14 — Information Transfer
-Search for data transfer and check:
-- API encryption (HTTPS)
-- Webhook signature verification
-- File transfer security
-- Email security (if applicable)
+### Phase 5: Reconcile or Finalize
 
-### A.8.34 — Protection of Information Systems During Audit Testing
-Search for test/audit patterns and check:
-- Read-only audit endpoints
-- Test data isolation
-- Audit logging configuration
+If the reviewer returns `changes_requested`:
 
-## Step 4: Report
+1. re-run the same assessor with the requested changes
+2. overwrite the domain artifact
+3. re-run the reviewer once more
 
-Present a concise assessment:
+If disagreement remains after the second pass:
 
-```
-## Quick Check: A.8.5 — Secure Authentication
+- finalize with `review.status = "unresolved"`
+- tag the markdown output with `[REVIEWER NOTE: unresolved]`
 
-**Status**: partially_implemented
-**Maturity**: 3/5 (Defined)
-**Confidence**: 0.8
+Otherwise set `review.status = "approved"`.
 
-### Findings
+### Phase 6: Write Canonical and Compatibility Outputs
 
-**[HIGH] Weak password hashing**
-- `src/auth/password.ts:23` — Uses SHA-256 instead of bcrypt/Argon2
-- Recommendation: Migrate to Argon2id with appropriate parameters
+Write the canonical quick-check report to:
 
-**[MEDIUM] Missing rate limiting on login**
-- `src/routes/auth.ts:45` — Login endpoint has no rate limiting
-- Recommendation: Add rate limiting (e.g., 5 attempts per 15 minutes)
+- `shinsa-output/runs/<assessment_id>/synthesis/compliance-report.md`
+- `shinsa-output/runs/<assessment_id>/synthesis/evidence-index.json`
+- `shinsa-output/runs/<assessment_id>/synthesis/control-matrix.json`
 
-### Passing Checks
-- Session tokens use secure random generation
-- HTTP-only and Secure cookie flags are set
-- Token expiry is configured (24h access, 7d refresh)
+The canonical report is an enterprise evidence pack and must include:
 
-### Overall: 2 findings (1 high, 1 medium)
-```
+1. `Assessment Metadata`
+2. `Executive Summary`
+3. `Control Matrix`
+4. `Findings`
+5. `Evidence Index`
+6. `Reviewer Notes`
+7. `Unresolved Risks`
+8. `Limitations`
+9. `What To Do Next`
+10. `Human Sign-Off`
 
-If `--verbose` is set, include all passing checks with evidence. Otherwise, only show findings and a brief summary of what's passing.
+Assessment metadata must include timestamp, plugin version, target path, target commit placeholder or commit hash, assessment mode, standards, scope exclusions, methodology, and raw artifact references.
+
+Every assessed control must show status, confidence, `confidence_rationale`, evidence quality (`strong`, `partial`, `inferred`, or `missing`), `evidence_quality_rationale`, whether manual evidence is needed, `manual_evidence_items`, reviewer disposition, evidence paths, remediation priority, and `grc_action`.
+
+Then mirror the latest run outputs to:
+
+- `shinsa-output/runs/<assessment_id>/shinsa-state.json`
+- `shinsa-output/runs/<assessment_id>/compliance-report.md`
+- `shinsa-output/shinsa-state.json`
+- `shinsa-output/compliance-report.md`
+
+If `--verbose` is set, keep passing checks in the markdown report. Otherwise lead with findings and summary.

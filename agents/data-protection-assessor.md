@@ -126,6 +126,25 @@ Read error handlers and check:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If code shows partial data protection but retention policy, data classification, DLP operations, or production processor evidence is missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: PII logged in plaintext (passwords, full credit card numbers, SSNs), credentials in error messages, SQL injection possible, sensitive data in URL parameters
@@ -141,6 +160,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### A.8.12 — Data Leakage Prevention
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.85
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Middleware evidence supports response sanitization, but repository evidence does not prove data classification or production DLP operations.
+**Evidence Quality Rationale**: Code anchors support technical safeguards, while manual privacy/process evidence is required for full compliance.
+**Manual Evidence Items**: Data classification register; production DLP monitoring records
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/middleware/error.ts:15` — Global error handler strips stack traces in production (PASS)
@@ -163,3 +187,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Microservices**: Data masking should be consistent across all services
 - **Third-party logging**: If using Datadog, Sentry, etc., check if PII scrubbing is configured
 - **File uploads**: Check for malware scanning, file type validation, storage encryption
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "data-protection-assessor"`
+- `standard = "iso27001"`
+- `domain = "data-protection-transfer"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/data-protection-assessor.json` and `domains/data-protection-assessor.md`.

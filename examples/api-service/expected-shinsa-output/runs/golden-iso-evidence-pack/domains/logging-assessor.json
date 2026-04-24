@@ -1,0 +1,57 @@
+{
+  "agent": "logging-assessor",
+  "standard": "iso27001",
+  "domain": "logging-monitoring-audit",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "A.8.15",
+      "control_family": "A.8",
+      "title": "Logging",
+      "status": "partially_implemented",
+      "maturity": 3,
+      "confidence": 0.78,
+      "agent": "logging-assessor",
+      "evidence_summary": "Structured logging exists, but privileged account deletion has no audit event and production retention evidence is absent.",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Production log retention policy",
+        "SIEM ingestion evidence",
+        "Privileged action review procedure"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Application logging code and the missing privileged-action audit call were reviewed, but production retention and monitoring records were not available.",
+      "evidence_quality_rationale": "Evidence is partial because source anchors support selected logging behavior but operational log governance requires manual artifacts.",
+      "grc_action": "create_remediation_ticket",
+      "findings": [
+        {
+          "title": "Privileged user deletion is not audit logged",
+          "severity": "medium",
+          "description": "The admin delete route deletes a user without writing an audit log event.",
+          "evidence": [
+            {
+              "file_path": "src/routes/admin.ts",
+              "start_line": 5,
+              "assessment": "The deletion path has no audit logger invocation before or after the sensitive change."
+            }
+          ],
+          "gap": "Privileged data modifications lack a durable audit trail.",
+          "recommendation": "Add structured audit logging for privileged user changes."
+        }
+      ],
+      "gaps": [
+        "Missing privileged-action audit logging",
+        "Missing production log retention evidence"
+      ],
+      "recommendations": [
+        "Add audit logging for admin actions",
+        "Attach SIEM and retention evidence"
+      ]
+    }
+  ],
+  "summary": {
+    "controls_assessed": 1,
+    "findings_total": 1
+  }
+}

@@ -151,6 +151,25 @@ For each control:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If crypto, TLS, or network protections are visible in code but production TLS scans, cloud encryption settings, or boundary configuration evidence is missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: Hardcoded encryption keys, disabled TLS certificate verification, broken crypto (MD5 for integrity, DES, ECB mode), plaintext transmission of sensitive data
@@ -166,6 +185,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### SC-13 — Cryptographic Protection
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.9
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Source evidence confirms modern crypto in one component, but production key and TLS evidence were not present.
+**Evidence Quality Rationale**: Code evidence supports implementation detail and does not prove operational cryptographic governance.
+**Manual Evidence Items**: Production TLS scan; cloud encryption configuration export; key rotation record
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/utils/crypto.ts:15` — AES-256-GCM with random IV (PASS)
@@ -187,3 +211,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Legacy code**: Flag deprecated crypto but note if active code path vs dead code
 - **Environment files**: .env with actual secrets are critical findings; .env.example with placeholders are acceptable
 - **Certificate management**: If using Let's Encrypt/cert-manager, check auto-renewal configuration
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "nist-sc-assessor"`
+- `standard = "nist-800-53"`
+- `domain = "system-communications-protection"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/nist-sc-assessor.json` and `domains/nist-sc-assessor.md`.

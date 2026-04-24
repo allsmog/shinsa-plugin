@@ -1,0 +1,20 @@
+[
+  {
+    "control_id": "A.8.5",
+    "title": "Secure authentication",
+    "status": "implemented",
+    "confidence": 0.9,
+    "confidence_rationale": "Fixture password helper is treated as a narrow code-level quick check with direct source evidence.",
+    "evidence_quality": "strong",
+    "evidence_quality_rationale": "Direct source evidence supports the scoped password-hashing claim and no manual evidence is required.",
+    "manual_evidence_needed": false,
+    "manual_evidence_items": [],
+    "reviewer_disposition": "approved",
+    "remediation_priority": "none",
+    "ticket_ready_action": "No action for fixture.",
+    "grc_action": "accept",
+    "evidence_paths": [
+      "src/auth/password.ts:1"
+    ]
+  }
+]

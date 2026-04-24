@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "reviewer_min_pass_rate": 0.67,
+  "trigger_results": [
+    {
+      "case_id": "trigger-iso-full",
+      "target": "compliance-scan",
+      "should_trigger": true,
+      "observed_trigger_rate": 1.0
+    },
+    {
+      "case_id": "trigger-nist-quick",
+      "target": "nist-quick-check",
+      "should_trigger": true,
+      "observed_trigger_rate": 1.0
+    },
+    {
+      "case_id": "trigger-maintainer-plan",
+      "target": "control-plan",
+      "should_trigger": true,
+      "observed_trigger_rate": 1.0
+    },
+    {
+      "case_id": "trigger-maintainer-implement",
+      "target": "control-implement",
+      "should_trigger": true,
+      "observed_trigger_rate": 1.0
+    },
+    {
+      "case_id": "ignore-general-chat",
+      "target": "none",
+      "should_trigger": false,
+      "observed_trigger_rate": 0.0
+    },
+    {
+      "case_id": "ignore-unrelated-debugging",
+      "target": "none",
+      "should_trigger": false,
+      "observed_trigger_rate": 0.0
+    }
+  ],
+  "run_results": [
+    {
+      "case_id": "iso-full-scan-artifacts",
+      "command": "compliance-scan",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/iso-full-scan-artifacts",
+      "source_root": "evals/fixtures/sample-app",
+      "review_rounds": [
+        {
+          "angle": "evidence_completeness",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        },
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "A.8.5",
+          "file_path": "src/routes/auth.ts",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "nist-full-scan-applicability",
+      "command": "nist-scan",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/nist-full-scan-applicability",
+      "source_root": "evals/fixtures/sample-app",
+      "review_rounds": [
+        {
+          "angle": "evidence_completeness",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        },
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "CM-6",
+          "file_path": "Dockerfile",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "resume-preserves-artifacts",
+      "command": "compliance-scan",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/resume-preserves-artifacts",
+      "source_root": "evals/fixtures/sample-app",
+      "review_rounds": [
+        {
+          "angle": "evidence_completeness",
+          "status": "changes_requested"
+        },
+        {
+          "angle": "evidence_completeness",
+          "status": "approved"
+        },
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "A.8.15",
+          "file_path": "src/logger.ts",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "quick-check-review-disagreement",
+      "command": "quick-check",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/quick-check-review-disagreement",
+      "source_root": "evals/fixtures/sample-app",
+      "review_rounds": [
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "A.8.5",
+          "file_path": "src/auth/password.ts",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "golden-api-evidence-pack",
+      "command": "compliance-scan",
+      "status": "passed",
+      "artifact_root": "examples/api-service/expected-shinsa-output/runs/golden-iso-evidence-pack",
+      "source_root": "examples/api-service",
+      "expected_findings_total": 2,
+      "quality_notes": {
+        "false_positive_notes": "Expected findings are intentional product-demo gaps: missing login throttling and missing privileged-action audit logging.",
+        "false_negative_notes": "Known positive evidence includes bcrypt password verification and header redaction; sample intentionally omits broader production policies."
+      },
+      "review_rounds": [
+        {
+          "angle": "evidence_completeness",
+          "status": "approved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        },
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "A.8.5",
+          "file_path": "src/routes/auth.ts",
+          "start_line": 7
+        },
+        {
+          "control_id": "A.8.15",
+          "file_path": "src/routes/admin.ts",
+          "start_line": 5
+        }
+      ]
+    },
+    {
+      "case_id": "golden-platform-evidence-pack",
+      "command": "nist-scan",
+      "status": "passed",
+      "artifact_root": "examples/platform-app/expected-shinsa-output/runs/golden-nist-evidence-pack",
+      "source_root": "examples/platform-app",
+      "expected_findings_total": 1,
+      "quality_notes": {
+        "false_positive_notes": "The CM-6 container-hardening finding is intentional because the Dockerfile has no USER directive.",
+        "false_negative_notes": "Benchmark records unresolved human review for production container runtime evidence outside the repository."
+      },
+      "review_rounds": [
+        {
+          "angle": "evidence_completeness",
+          "status": "changes_requested"
+        },
+        {
+          "angle": "evidence_completeness",
+          "status": "unresolved"
+        },
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        },
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "CM-6",
+          "file_path": "Dockerfile",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "maintainer-change-benchmark",
+      "command": "control-implement",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/maintainer-change-benchmark",
+      "source_root": "evals/fixtures/sample-app",
+      "slug": "add-si-16-hardening",
+      "review_rounds": [
+        {
+          "angle": "coverage_false_negative_risk",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "SI-16",
+          "file_path": "agents/nist-si-assessor.md",
+          "start_line": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "shinsa-golden-platform-app",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node test/health.test.js",
+    "audit": "npm audit --audit-level=high"
+  }
+}

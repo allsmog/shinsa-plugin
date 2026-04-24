@@ -1,0 +1,23 @@
+[
+  {
+    "control_id": "A.8.5",
+    "title": "Secure authentication",
+    "status": "partially_implemented",
+    "confidence": 0.8,
+    "confidence_rationale": "Fixture source anchor supports the authentication gap, but production identity evidence is absent.",
+    "evidence_quality": "partial",
+    "evidence_quality_rationale": "Code evidence is present and manual authentication evidence remains outstanding.",
+    "manual_evidence_needed": true,
+    "manual_evidence_items": [
+      "Production MFA policy",
+      "Login lockout configuration"
+    ],
+    "reviewer_disposition": "approved",
+    "remediation_priority": "high",
+    "ticket_ready_action": "Add login throttling and attach MFA/lockout evidence.",
+    "grc_action": "create_remediation_ticket",
+    "evidence_paths": [
+      "src/routes/auth.ts:1"
+    ]
+  }
+]

@@ -143,6 +143,25 @@ Read logging configuration and check:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If code shows structured logging but retention, SIEM ingestion, alert ownership, or production access controls are not present, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: Passwords or tokens logged in plaintext, no logging at all on authentication endpoints
@@ -158,6 +177,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### A.8.15 — Logging
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.9
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Source evidence confirms structured logging, but retention and production monitoring records were not available.
+**Evidence Quality Rationale**: Code anchors are concrete for application logging and incomplete for operational logging governance.
+**Manual Evidence Items**: Log retention policy; SIEM ingestion screenshot or export; alert ownership roster
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/utils/logger.ts:5` — Winston configured with JSON format (PASS)
@@ -184,3 +208,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Containerized**: Log aggregation (ELK, Loki, Datadog) — check if configured
 - **Microservices**: Distributed tracing (Jaeger, Zipkin, OTEL) — check correlation IDs
 - **Third-party monitoring**: If using managed APM (New Relic, Datadog), check integration configuration
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "logging-assessor"`
+- `standard = "iso27001"`
+- `domain = "logging-monitoring-audit"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/logging-assessor.json` and `domains/logging-assessor.md`.

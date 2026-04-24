@@ -1,0 +1,1 @@
+# Quick Check Artifact Fixture

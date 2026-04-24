@@ -1,7 +1,7 @@
 {
   "name": "shinsa",
-  "version": "2.0.0",
-  "description": "AI-first compliance assessment plugin for Claude Code. Scans codebases against ISO 27001 Annex A and NIST SP 800-53 Rev 5 with evidence-backed findings tied to specific files and line numbers. 10 specialized assessment agents and structured output.",
+  "version": "3.2.0",
+  "description": "AI-first compliance assessment plugin for Claude Code. Runs prompt-orchestrated ISO 27001 Annex A and NIST SP 800-53 Rev 5 assessments with enterprise evidence packs, evidence-backed findings, cold review rounds, and durable run artifacts.",
   "author": {
     "name": "allsmog",
     "url": "https://github.com/allsmog/shinsa-plugin"

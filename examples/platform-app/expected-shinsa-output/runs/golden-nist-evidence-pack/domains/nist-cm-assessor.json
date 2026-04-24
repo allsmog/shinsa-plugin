@@ -1,0 +1,85 @@
+{
+  "agent": "nist-cm-assessor",
+  "standard": "nist-800-53",
+  "domain": "configuration-management-risk-assessment",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "CM-6",
+      "control_family": "CM",
+      "title": "Configuration Settings",
+      "status": "partially_implemented",
+      "maturity": 2,
+      "confidence": 0.74,
+      "agent": "nist-cm-assessor",
+      "evidence_summary": "The Dockerfile declares the runtime image but no non-root USER directive; production runtime evidence remains unresolved.",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Production container runtime configuration",
+        "Approved baseline configuration",
+        "Container hardening exception or remediation ticket"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Repository evidence supports the Docker hardening finding, but production runtime configuration was not available.",
+      "evidence_quality_rationale": "Evidence is partial because source evidence shows a configuration gap and manual runtime evidence is required to close the reviewer concern.",
+      "grc_action": "request_evidence",
+      "findings": [
+        {
+          "title": "Container image does not declare a non-root runtime user",
+          "severity": "medium",
+          "description": "The Dockerfile starts from a Node image and does not switch to a non-root user.",
+          "evidence": [
+            {
+              "file_path": "Dockerfile",
+              "start_line": 1,
+              "assessment": "No USER directive appears in the Dockerfile."
+            }
+          ],
+          "gap": "Runtime least privilege is not enforced in repository configuration.",
+          "recommendation": "Add an explicit non-root USER directive or attach production runtime evidence proving non-root execution."
+        }
+      ],
+      "gaps": [
+        "Missing non-root container runtime declaration",
+        "Missing production runtime evidence"
+      ],
+      "recommendations": [
+        "Add a non-root USER directive",
+        "Attach production runtime configuration"
+      ]
+    },
+    {
+      "control_id": "RA-5",
+      "control_family": "RA",
+      "title": "Vulnerability Monitoring and Scanning",
+      "status": "partially_implemented",
+      "maturity": 3,
+      "confidence": 0.72,
+      "agent": "nist-cm-assessor",
+      "evidence_summary": "CI runs npm audit, but no latest scan export or remediation queue is included.",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Latest dependency vulnerability scan export",
+        "Vulnerability remediation ticket queue",
+        "Risk acceptance records for unresolved findings"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "CI configuration shows automated dependency scanning, but scan results and remediation tracking are outside the repository.",
+      "evidence_quality_rationale": "Evidence is partial because the workflow proves a scan command exists but not that vulnerabilities are reviewed and remediated.",
+      "grc_action": "request_evidence",
+      "findings": [],
+      "gaps": [
+        "Missing latest vulnerability scan records"
+      ],
+      "recommendations": [
+        "Attach scan results and remediation tracking evidence"
+      ]
+    }
+  ],
+  "summary": {
+    "controls_assessed": 2,
+    "findings_total": 1
+  }
+}

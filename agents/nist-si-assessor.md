@@ -146,6 +146,25 @@ For each control:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If input validation or error handling is visible in source but monitoring, vulnerability management, incident handling, or data lifecycle records are missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: SQL injection possible, command injection possible, sensitive data in URL parameters, no input validation on authentication endpoints
@@ -161,6 +180,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### SI-10 — Information Input Validation
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.85
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Validation middleware evidence covers common routes, but coverage and production defect monitoring were not fully proven.
+**Evidence Quality Rationale**: Source anchors support selected validation behavior and require operational evidence for broader assurance.
+**Manual Evidence Items**: Production validation defect metrics; vulnerability remediation records
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/middleware/validate.ts:10` — Zod schema validation on API endpoints (PASS)
@@ -182,3 +206,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Microservices**: Validate at service boundaries, not just API gateway
 - **File processing**: Check for zip bombs, XML external entities, image processing vulnerabilities
 - **Legacy endpoints**: Flag missing validation but note if in active code paths
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "nist-si-assessor"`
+- `standard = "nist-800-53"`
+- `domain = "system-integrity-media-protection"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/nist-si-assessor.json` and `domains/nist-si-assessor.md`.

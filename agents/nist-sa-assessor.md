@@ -121,6 +121,25 @@ For each control:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If CI and tests exist but secure SDLC policy, review records, supplier evaluations, or release approvals are missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: No testing infrastructure at all with production code deployed
@@ -136,6 +155,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### SA-11 — Developer Testing and Evaluation
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.85
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: CI evidence confirms tests execute, but security test acceptance criteria and release approval records were absent.
+**Evidence Quality Rationale**: Automated testing evidence is concrete, while SDLC governance evidence remains manual.
+**Manual Evidence Items**: Secure SDLC policy; release approval record; security test acceptance criteria
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `test/` — Test directory exists with 45 test files (PASS)
@@ -163,3 +187,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Polyglot repos**: Each language should have appropriate linting/testing tools
 - **Serverless**: Test infrastructure may differ (SAM local, serverless-offline)
 - **Open source**: Check for external contributor guidelines and security policies (SECURITY.md)
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "nist-sa-assessor"`
+- `standard = "nist-800-53"`
+- `domain = "system-acquisition-development"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/nist-sa-assessor.json` and `domains/nist-sa-assessor.md`.

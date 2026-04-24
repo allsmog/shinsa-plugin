@@ -1,100 +1,61 @@
 ---
 name: session-init
-description: Initialize compliance assessment session and check for previous state
+description: Initialize a Shinsa session by detecting the latest orchestrated run state
 event: SessionStart
 ---
 
 # Compliance Assessment Session Initialization
 
-On session start, check for existing assessment state and provide context.
+On session start, detect the latest orchestrated run and summarize its phase, round, and review status.
 
 ## State Detection
 
 Check for existing assessment state:
 
 ```bash
-ls shinsa-output/shinsa-state.json shinsa-output/compliance-report.md 2>/dev/null || true
+ls shinsa-output/shinsa-state.json shinsa-output/runs/*/shinsa-state.json 2>/dev/null || true
 ```
 
-### If state file exists:
+## If a State File Exists
 
-Read `shinsa-output/shinsa-state.json` and display. Check the `standard` field to determine which standard was assessed:
+Read the latest `shinsa-output/shinsa-state.json` and summarize:
 
-**If standard is "iso27001":**
-```
-**Shinsa Compliance Assessment Resumed**
+- target
+- standard
+- `run.id`
+- `run.mode`
+- `run.phase`
+- `run.round`
+- `review.status`
+- controls assessed
+- findings totals
+- last updated timestamp
 
-Previous assessment detected:
-- **Target**: [From state file]
-- **Standard**: ISO 27001:2022 Annex A
-- **Agents Completed**: [List of completed agents]
-- **Controls Assessed**: [count]
-- **Compliance**: [percentage]%
-- **Findings**: [total] ([critical] critical, [high] high, [medium] medium, [low] low)
-- **Last Updated**: [timestamp]
+Also mention that canonical artifacts live under:
 
-**Quick Actions:**
-- `/shinsa:compliance-scan --resume` - Continue ISO 27001 assessment
-- `/shinsa:quick-check A.8.5` - Check a specific ISO control
-- `/shinsa:nist-scan` - Start a NIST 800-53 assessment
-- Type "reset assessment" to start fresh
-
-**Top Findings:**
-[List top 3 findings by severity]
+```text
+shinsa-output/runs/<assessment_id>/
 ```
 
-**If standard is "nist-800-53":**
-```
-**Shinsa Compliance Assessment Resumed**
+Quick actions:
 
-Previous assessment detected:
-- **Target**: [From state file]
-- **Standard**: NIST SP 800-53 Rev 5
-- **Domains Completed**: [List of completed domains]
-- **Controls Assessed**: [count]
-- **Compliance**: [percentage]%
-- **Findings**: [total] ([critical] critical, [high] high, [medium] medium, [low] low)
-- **Last Updated**: [timestamp]
+- `/shinsa:compliance-scan --resume`
+- `/shinsa:nist-scan --resume`
+- `/shinsa:quick-check <control>`
+- `/shinsa:nist-quick-check <control>`
 
-**Quick Actions:**
-- `/shinsa:nist-scan --resume` - Continue NIST 800-53 assessment
-- `/shinsa:nist-quick-check AC-3` - Check a specific NIST control
-- `/shinsa:compliance-scan` - Start an ISO 27001 assessment
-- Type "reset assessment" to start fresh
+If the state is unresolved, explicitly call out that the latest report contains reviewer notes.
 
-**Top Findings:**
-[List top 3 findings by severity]
-```
+## If No State File Exists
 
-### If no state file exists:
-
-Check codebase size:
+Count source files:
 
 ```bash
 find . -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.java" -o -name "*.go" -o -name "*.php" -o -name "*.rb" -o -name "*.rs" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/vendor/*" -not -path "*/dist/*" 2>/dev/null | wc -l
 ```
 
-Display welcome:
+Display a short welcome that includes:
 
-```
-**Shinsa Compliance Plugin Ready**
-
-Compliance assessment with evidence-backed findings tied to specific files and line numbers.
-
-**Available Standards:**
-- **ISO 27001:2022** — Annex A technological controls (13 controls, 4 domains)
-- **NIST SP 800-53 Rev 5** — Federal security controls (53 controls, 6 domains)
-
-**Available Commands:**
-- `/shinsa:compliance-scan` - Full ISO 27001 assessment
-- `/shinsa:quick-check <control>` - Fast ISO control check (e.g., A.8.5)
-- `/shinsa:nist-scan` - Full NIST 800-53 assessment
-- `/shinsa:nist-quick-check <control>` - Fast NIST control check (e.g., AC-3)
-
-**Quick Start Examples:**
-- `/shinsa:compliance-scan` - Full ISO 27001 assessment
-- `/shinsa:nist-scan` - Full NIST 800-53 assessment
-- `/shinsa:quick-check A.8.5` - Check ISO secure authentication
-- `/shinsa:nist-quick-check AC-3` - Check NIST access enforcement
-- `/shinsa:nist-quick-check AU` - Check all NIST audit controls
-```
+- the four assessment commands
+- the two maintainer commands
+- the fact that full scans persist artifacts to `shinsa-output/runs/<assessment_id>/`

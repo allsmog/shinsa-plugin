@@ -142,6 +142,25 @@ For each control:
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If repository configuration evidence is positive but baseline approval, production config exports, asset inventory, or vulnerability scan records are missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: Debug mode enabled in production with sensitive data exposure, hardcoded deployment credentials, no authentication on CI/CD deployment
@@ -157,6 +176,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### CM-6 — Configuration Settings
 **Status**: partially_implemented | **Maturity**: 2/5 | **Confidence**: 0.8
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Docker and app configuration evidence was available, but production baseline approval and runtime settings were not.
+**Evidence Quality Rationale**: Repository anchors support selected configuration claims and leave operational configuration evidence outstanding.
+**Manual Evidence Items**: Approved baseline configuration; production runtime configuration export
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `Dockerfile:1` — Using node:18-alpine base image (PASS)
@@ -183,3 +207,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Serverless**: Configuration via cloud provider (Lambda env vars, API Gateway settings)
 - **Kubernetes**: Check RBAC, network policies, pod security policies
 - **Multi-cloud**: Check configuration consistency across providers
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "nist-cm-assessor"`
+- `standard = "nist-800-53"`
+- `domain = "configuration-management-risk-assessment"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/nist-cm-assessor.json` and `domains/nist-cm-assessor.md`.

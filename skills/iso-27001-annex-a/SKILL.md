@@ -21,6 +21,10 @@ Comprehensive reference for all 93 ISO 27001:2022 Annex A controls, with focus o
 - When answering questions about ISO 27001 requirements
 - When mapping findings to compliance frameworks
 
+## Orchestration Note
+
+This skill is reference material, not the orchestrator. The command files own run planning, assessor dispatch, reviewer loops, and artifact persistence.
+
 ## Shipped Command Coverage
 
 This skill is intentionally broader than the currently shipped ISO scan commands.

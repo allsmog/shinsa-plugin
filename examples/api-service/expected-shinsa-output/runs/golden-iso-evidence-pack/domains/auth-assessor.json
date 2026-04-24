@@ -1,0 +1,57 @@
+{
+  "agent": "auth-assessor",
+  "standard": "iso27001",
+  "domain": "authentication-access-control",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "A.8.5",
+      "control_family": "A.8",
+      "title": "Secure authentication",
+      "status": "partially_implemented",
+      "maturity": 3,
+      "confidence": 0.86,
+      "agent": "auth-assessor",
+      "evidence_summary": "bcrypt password verification is present, but the login route lacks rate limiting and production MFA/lockout evidence is not in the repository.",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Production MFA policy",
+        "Login lockout configuration export",
+        "Privileged access review records"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Source evidence directly supports password hashing and the missing rate-limit gap, but production identity governance evidence was not present.",
+      "evidence_quality_rationale": "Evidence is partial because concrete code anchors cover only technical authentication behavior and manual access governance records remain outstanding.",
+      "grc_action": "create_remediation_ticket",
+      "findings": [
+        {
+          "title": "Login endpoint lacks rate limiting",
+          "severity": "high",
+          "description": "The login route calls the handler directly without throttling middleware.",
+          "evidence": [
+            {
+              "file_path": "src/routes/auth.ts",
+              "start_line": 7,
+              "assessment": "No rate limiting middleware is applied before login handling."
+            }
+          ],
+          "gap": "Brute-force protection is absent.",
+          "recommendation": "Add per-IP and per-account login throttling."
+        }
+      ],
+      "gaps": [
+        "Missing login throttling",
+        "Missing production MFA and lockout evidence"
+      ],
+      "recommendations": [
+        "Add login rate limiting",
+        "Attach MFA policy and lockout configuration evidence"
+      ]
+    }
+  ],
+  "summary": {
+    "controls_assessed": 1,
+    "findings_total": 1
+  }
+}

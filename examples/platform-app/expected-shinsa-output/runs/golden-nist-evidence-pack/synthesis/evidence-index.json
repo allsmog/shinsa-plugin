@@ -1,0 +1,5 @@
+[
+  {"control_id":"CM-6","file_path":"Dockerfile","start_line":1,"evidence_quality":"partial"},
+  {"control_id":"RA-5","file_path":".github/workflows/ci.yml","start_line":15,"evidence_quality":"partial"},
+  {"control_id":"SI-10","file_path":"src/server.js","start_line":5,"evidence_quality":"strong"}
+]

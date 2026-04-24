@@ -113,6 +113,25 @@ grep -rniE "(tls|ssl|https|cert|certificate|secureProtocol|minVersion|TLSv1|SSLv
 
 For each control, provide status, maturity, confidence, evidence, findings, gaps, and recommendations.
 
+Also include the enterprise evidence-pack fields required by `references/orchestration-contract.md`:
+
+- `evidence_quality`: `strong`, `partial`, `inferred`, or `missing`
+- `manual_evidence_needed`: boolean
+- `manual_evidence_items`: specific policy, approval, operational, or production records still needed; use `[]` only when no manual evidence is needed
+- `reviewer_disposition`: always `"not_reviewed"` in assessor output
+- `confidence_rationale`: why the confidence score is appropriate
+- `evidence_quality_rationale`: why the evidence quality label is appropriate
+- `grc_action`: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If code evidence is positive but policy, key-management records, production TLS configuration, or KMS operational evidence is missing, use `partially_implemented` with `manual_evidence_needed: true`.
+
 ## Severity Guidelines
 
 - **Critical**: Hardcoded encryption keys or secrets in source code, disabled TLS certificate verification (`rejectUnauthorized: false`, `verify=False`), use of broken crypto (MD5 for integrity, DES, ECB mode), plaintext transmission of sensitive data
@@ -128,6 +147,11 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 
 ### A.8.24 — Use of Cryptography
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.9
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Source evidence confirms modern encryption in active code, but no key rotation records were present.
+**Evidence Quality Rationale**: Implementation evidence is concrete, while manual KMS/key lifecycle evidence remains outside the repository.
+**Manual Evidence Items**: Key rotation records; production KMS access review
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/utils/crypto.ts:15` — AES-256-GCM with random IV (PASS)
@@ -150,3 +174,18 @@ For each control, provide status, maturity, confidence, evidence, findings, gaps
 - **Legacy code**: Flag deprecated crypto but note if it's in active code paths vs dead code
 - **Environment files**: `.env` files with actual secrets are critical findings; `.env.example` with placeholders are acceptable
 - **Certificate management**: If using Let's Encrypt/cert-manager, check auto-renewal configuration
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "crypto-assessor"`
+- `standard = "iso27001"`
+- `domain = "cryptography-network-services"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/crypto-assessor.json` and `domains/crypto-assessor.md`.

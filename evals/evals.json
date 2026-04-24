@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "iso-full-scan-artifacts",
+      "kind": "assessment",
+      "command": "compliance-scan",
+      "prompt": "/shinsa:compliance-scan",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "scope.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-*/evidence-completeness.json",
+        "synthesis/control-matrix.json",
+        "synthesis/evidence-index.json",
+        "synthesis/compliance-report.md"
+      ],
+      "minimum_reviewer_pass_rate": 0.67
+    },
+    {
+      "id": "nist-full-scan-applicability",
+      "kind": "assessment",
+      "command": "nist-scan",
+      "prompt": "/shinsa:nist-scan",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-*/coverage-review.json"
+      ],
+      "minimum_reviewer_pass_rate": 0.67
+    },
+    {
+      "id": "resume-preserves-artifacts",
+      "kind": "assessment",
+      "command": "compliance-scan",
+      "prompt": "/shinsa:compliance-scan --resume",
+      "required_artifacts": [
+        "shinsa-state.json",
+        "domains/*.json",
+        "reviews/round-*/control-interpretation.json"
+      ],
+      "minimum_reviewer_pass_rate": 0.67
+    },
+    {
+      "id": "quick-check-review-disagreement",
+      "kind": "assessment",
+      "command": "quick-check",
+      "prompt": "/shinsa:quick-check A.8.5",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "scope.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-1/*.json",
+        "synthesis/control-matrix.json",
+        "synthesis/evidence-index.json",
+        "synthesis/compliance-report.md"
+      ],
+      "minimum_reviewer_pass_rate": 1.0
+    },
+    {
+      "id": "golden-api-evidence-pack",
+      "kind": "enterprise_benchmark",
+      "command": "compliance-scan",
+      "prompt": "/shinsa:compliance-scan examples/api-service --controls A.8.5,A.8.15",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "scope.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-*/*.json",
+        "synthesis/control-matrix.json",
+        "synthesis/evidence-index.json",
+        "synthesis/compliance-report.md"
+      ],
+      "minimum_reviewer_pass_rate": 1.0
+    },
+    {
+      "id": "golden-platform-evidence-pack",
+      "kind": "enterprise_benchmark",
+      "command": "nist-scan",
+      "prompt": "/shinsa:nist-scan examples/platform-app --family CM,RA,SI",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "scope.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-*/*.json",
+        "synthesis/control-matrix.json",
+        "synthesis/evidence-index.json",
+        "synthesis/compliance-report.md"
+      ],
+      "minimum_reviewer_pass_rate": 0.5
+    },
+    {
+      "id": "maintainer-change-benchmark",
+      "kind": "maintainer",
+      "command": "control-implement",
+      "prompt": "/shinsa:control-implement add-si-16-hardening",
+      "required_artifacts": [
+        ".plans/<slug>.md",
+        ".plans/<slug>/implementation-notes.md",
+        ".plans/<slug>/benchmark.json"
+      ],
+      "minimum_reviewer_pass_rate": 0.67
+    }
+  ]
+}

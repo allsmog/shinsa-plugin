@@ -126,6 +126,22 @@ For each control, provide:
 - **Findings**: Issues found, with severity and recommendations
 - **Gaps**: Control requirements not met
 - **Recommendations**: How to remediate findings
+- **Evidence Quality (`evidence_quality`)**: `strong`, `partial`, `inferred`, or `missing`
+- **Manual Evidence Needed (`manual_evidence_needed`)**: boolean
+- **Manual Evidence Items (`manual_evidence_items`)**: specific policy, approval, access review, production configuration, or operational records still needed; use `[]` only when no manual evidence is needed
+- **Reviewer Disposition (`reviewer_disposition`)**: always `"not_reviewed"` in assessor output
+- **Confidence Rationale (`confidence_rationale`)**: why the confidence score is appropriate
+- **Evidence Quality Rationale (`evidence_quality_rationale`)**: why the evidence quality label is appropriate
+- **GRC Action (`grc_action`)**: `accept`, `reject`, `request_evidence`, or `create_remediation_ticket`
+
+Evidence quality scoring rules:
+
+- `strong`: direct source/config evidence supports the claimed outcome and no manual evidence remains for the claim
+- `partial`: concrete evidence supports part of the control, but implementation gaps or manual evidence needs remain
+- `inferred`: the outcome depends on framework convention, indirect evidence, or absence-of-evidence reasoning
+- `missing`: no reliable evidence was found
+
+Do not mark a control `implemented` when manual evidence is still required for full compliance. If code confirms an auth mechanism but access reviews, MFA policy, lockout procedures, identity-provider settings, or production authorization records are missing, use `partially_implemented` with `manual_evidence_needed: true`.
 
 ## Severity Guidelines
 
@@ -144,6 +160,11 @@ Present your assessment as:
 
 ### A.8.5 — Secure Authentication
 **Status**: partially_implemented | **Maturity**: 3/5 | **Confidence**: 0.85
+**Evidence Quality**: partial | **Manual Evidence Needed**: yes | **Reviewer Disposition**: not_reviewed
+**Confidence Rationale**: Source evidence confirms password hashing and token validation, but no production lockout or MFA evidence was present.
+**Evidence Quality Rationale**: Code anchors support several technical measures and leave process/IdP evidence outstanding.
+**Manual Evidence Items**: Access review records; production MFA policy; lockout configuration export
+**GRC Action**: create_remediation_ticket
 
 **Evidence**:
 - `src/auth/password.ts:23` — Uses bcrypt with cost factor 12 (PASS)
@@ -170,3 +191,18 @@ Present your assessment as:
 - **API-only services**: Focus on token validation, API key management, no session management expected
 - **Microservices**: Check service-to-service auth (mTLS, JWT propagation)
 - **Serverless**: Check function-level auth (API Gateway authorizers, middleware)
+
+## Orchestrated Output Contract
+
+When dispatched by an orchestrated Shinsa command, return:
+
+1. One JSON object matching the domain result contract in `references/orchestration-contract.md`
+2. One markdown summary for the same domain
+
+Set:
+
+- `agent = "auth-assessor"`
+- `standard = "iso27001"`
+- `domain = "authentication-access-control"`
+
+Do not write the top-level state file yourself. The orchestrator persists your output to `domains/auth-assessor.json` and `domains/auth-assessor.md`.

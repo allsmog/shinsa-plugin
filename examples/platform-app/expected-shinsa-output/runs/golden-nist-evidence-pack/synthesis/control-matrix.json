@@ -1,0 +1,65 @@
+[
+  {
+    "control_id": "CM-6",
+    "title": "Configuration Settings",
+    "status": "partially_implemented",
+    "confidence": 0.74,
+    "confidence_rationale": "Repository evidence supports the Docker hardening finding, but production runtime configuration was not available.",
+    "evidence_quality": "partial",
+    "evidence_quality_rationale": "Source evidence shows a configuration gap and manual runtime evidence is required to close the reviewer concern.",
+    "manual_evidence_needed": true,
+    "manual_evidence_items": [
+      "Production container runtime configuration",
+      "Approved baseline configuration",
+      "Container hardening exception or remediation ticket"
+    ],
+    "reviewer_disposition": "unresolved",
+    "remediation_priority": "medium",
+    "ticket_ready_action": "Add an explicit non-root USER directive or attach production runtime evidence proving non-root execution.",
+    "grc_action": "request_evidence",
+    "evidence_paths": [
+      "Dockerfile:1"
+    ],
+    "unresolved_reviewer_note": "Round 2 evidence-completeness review could not confirm production non-root runtime."
+  },
+  {
+    "control_id": "RA-5",
+    "title": "Vulnerability Monitoring and Scanning",
+    "status": "partially_implemented",
+    "confidence": 0.72,
+    "confidence_rationale": "CI configuration shows automated dependency scanning, but scan results and remediation tracking are outside the repository.",
+    "evidence_quality": "partial",
+    "evidence_quality_rationale": "The workflow proves a scan command exists but not that vulnerabilities are reviewed and remediated.",
+    "manual_evidence_needed": true,
+    "manual_evidence_items": [
+      "Latest dependency vulnerability scan export",
+      "Vulnerability remediation ticket queue",
+      "Risk acceptance records for unresolved findings"
+    ],
+    "reviewer_disposition": "approved",
+    "remediation_priority": "medium",
+    "ticket_ready_action": "Attach the latest scan results and remediation tracking evidence.",
+    "grc_action": "request_evidence",
+    "evidence_paths": [
+      ".github/workflows/ci.yml:15"
+    ]
+  },
+  {
+    "control_id": "SI-10",
+    "title": "Information Input Validation",
+    "status": "implemented",
+    "confidence": 0.82,
+    "confidence_rationale": "The assessed code path contains direct validation logic and no manual evidence is needed for this code-level outcome.",
+    "evidence_quality": "strong",
+    "evidence_quality_rationale": "The source anchor directly supports the validation claim for the scoped route.",
+    "manual_evidence_needed": false,
+    "manual_evidence_items": [],
+    "reviewer_disposition": "approved",
+    "remediation_priority": "none",
+    "ticket_ready_action": "Keep validation tests current as routes change.",
+    "grc_action": "accept",
+    "evidence_paths": [
+      "src/server.js:5"
+    ]
+  }
+]

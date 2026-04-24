@@ -1,0 +1,38 @@
+{
+  "agent": "auth-assessor",
+  "standard": "iso27001",
+  "domain": "authentication-access-control",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "A.8.5",
+      "title": "Secure authentication",
+      "status": "implemented",
+      "maturity": 3,
+      "confidence": 0.9,
+      "agent": "auth-assessor",
+      "evidence_quality": "strong",
+      "manual_evidence_needed": false,
+      "manual_evidence_items": [],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "Fixture password helper is treated as a narrow code-level quick check with direct source evidence.",
+      "evidence_quality_rationale": "Evidence is strong for the scoped password-hashing check because no manual evidence is required for that narrow claim.",
+      "grc_action": "accept",
+      "findings": [
+        {
+          "title": "Password hashing anchor",
+          "severity": "info",
+          "description": "Fixture password helper is used as a stable source anchor.",
+          "evidence": [
+            {
+              "file_path": "src/auth/password.ts",
+              "start_line": 1,
+              "assessment": "The fixture file provides the quick-check source anchor."
+            }
+          ],
+          "recommendation": "No action for fixture."
+        }
+      ]
+    }
+  ]
+}
