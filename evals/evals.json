@@ -64,6 +64,24 @@
       "minimum_reviewer_pass_rate": 1.0
     },
     {
+      "id": "iso-secure-coding-quick-check",
+      "kind": "assessment",
+      "command": "quick-check",
+      "prompt": "/shinsa:quick-check A.8.28",
+      "required_artifacts": [
+        "assessment-plan.md",
+        "scope.md",
+        "applicability.json",
+        "applicability.md",
+        "domains/*.json",
+        "reviews/round-1/*.json",
+        "synthesis/control-matrix.json",
+        "synthesis/evidence-index.json",
+        "synthesis/compliance-report.md"
+      ],
+      "minimum_reviewer_pass_rate": 1.0
+    },
+    {
       "id": "golden-api-evidence-pack",
       "kind": "enterprise_benchmark",
       "command": "compliance-scan",

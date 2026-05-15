@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added ISO 27001 A.8.28 Secure Coding as standalone shipped ISO coverage for full scans and quick checks.
+- Extended the data-protection assessor to assess secure coding evidence such as validation, parameterized queries, unsafe dynamic execution, deserialization safety, request limits, and secure defaults.
+- Added benchmark fixture coverage for A.8.28 quick-check evidence anchoring.
+
 ## 3.2.0 - Enterprise Trust Fields
 
 - Upgraded assessor prompts to emit evidence quality rationale, confidence rationale, manual evidence checklists, reviewer disposition, and GRC action for every control.

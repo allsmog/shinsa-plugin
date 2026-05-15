@@ -29,6 +29,7 @@ Supported ISO quick-check controls:
 - A.8.10
 - A.8.11
 - A.8.12
+- A.8.28
 - A.8.15
 - A.8.16
 - A.8.17
@@ -45,10 +46,10 @@ If the user requests another ISO control, explain that the reference skill conta
 
 1. Parse the requested control or family.
 2. Map it to the responsible domain assessor:
-   - `auth-assessor`
-   - `crypto-assessor`
-   - `data-protection-assessor`
-   - `logging-assessor`
+   - `auth-assessor`: A.8.2, A.8.3, A.8.5
+   - `crypto-assessor`: A.8.21, A.8.24
+   - `data-protection-assessor`: A.8.10, A.8.11, A.8.12, A.8.28, A.5.14
+   - `logging-assessor`: A.8.15, A.8.16, A.8.17, A.8.34
 3. Create a run directory under `shinsa-output/runs/<assessment_id>/`.
 
 ### Phase 2: Scope and Plan

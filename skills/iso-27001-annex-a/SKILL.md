@@ -29,13 +29,13 @@ This skill is reference material, not the orchestrator. The command files own ru
 
 This skill is intentionally broader than the currently shipped ISO scan commands.
 
-The shipped `/shinsa:compliance-scan` and `/shinsa:quick-check` commands currently produce standalone scored assessments for 13 core controls:
+The shipped `/shinsa:compliance-scan` and `/shinsa:quick-check` commands currently produce standalone scored assessments for 14 core controls:
 - A.8.2, A.8.3, A.8.5
-- A.8.10, A.8.11, A.8.12, A.5.14
+- A.8.10, A.8.11, A.8.12, A.8.28, A.5.14
 - A.8.15, A.8.16, A.8.17, A.8.34
 - A.8.21, A.8.24
 
-Additional controls in the reference files, including A.8.9, A.8.25, A.8.28, and A.8.31, remain useful as guidance and supporting context but are not currently emitted by the shipped commands as standalone scored results.
+Additional controls in the reference files, including A.8.9, A.8.25, and A.8.31, remain useful as guidance and supporting context but are not currently emitted by the shipped commands as standalone scored results.
 
 ## Control Families
 

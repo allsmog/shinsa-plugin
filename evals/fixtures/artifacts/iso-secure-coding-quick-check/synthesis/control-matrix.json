@@ -1,0 +1,24 @@
+[
+  {
+    "control_id": "A.8.28",
+    "title": "Secure coding",
+    "status": "partially_implemented",
+    "confidence": 0.86,
+    "confidence_rationale": "The fixture source directly shows unsafe query construction, but organizational secure coding standards and review evidence are outside the repository.",
+    "evidence_quality": "partial",
+    "evidence_quality_rationale": "Code evidence directly supports the injection finding and manual secure SDLC evidence remains outstanding.",
+    "manual_evidence_needed": true,
+    "manual_evidence_items": [
+      "Secure coding standard",
+      "Secure code review evidence",
+      "SAST or dependency vulnerability scan results"
+    ],
+    "reviewer_disposition": "approved",
+    "remediation_priority": "critical",
+    "ticket_ready_action": "Replace SQL string concatenation with parameterized queries and attach secure coding review evidence.",
+    "grc_action": "create_remediation_ticket",
+    "evidence_paths": [
+      "src/routes/search.ts:1"
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "agent": "data-protection-assessor",
+  "standard": "iso27001",
+  "domain": "data-protection-transfer",
+  "status": "completed",
+  "controls": [
+    {
+      "control_id": "A.8.28",
+      "title": "Secure coding",
+      "status": "partially_implemented",
+      "maturity": 2,
+      "confidence": 0.86,
+      "agent": "data-protection-assessor",
+      "evidence_quality": "partial",
+      "manual_evidence_needed": true,
+      "manual_evidence_items": [
+        "Secure coding standard",
+        "Secure code review evidence",
+        "SAST or dependency vulnerability scan results"
+      ],
+      "reviewer_disposition": "not_reviewed",
+      "confidence_rationale": "The fixture source directly shows unsafe query construction, but organizational secure coding standards and review evidence are outside the repository.",
+      "evidence_quality_rationale": "Evidence is partial because the code anchor supports a concrete secure coding gap while manual SDLC evidence remains outstanding.",
+      "grc_action": "create_remediation_ticket",
+      "findings": [
+        {
+          "title": "Search route builds SQL with request input",
+          "severity": "critical",
+          "description": "The fixture search handler concatenates a request query parameter into a SQL string.",
+          "evidence": [
+            {
+              "file_path": "src/routes/search.ts",
+              "start_line": 1,
+              "assessment": "The query string is built with req.query.email rather than a parameterized query or validated input."
+            }
+          ],
+          "gap": "Secure coding controls do not prevent injection in the search route.",
+          "recommendation": "Replace string concatenation with a parameterized query and validate the email input before querying."
+        }
+      ],
+      "gaps": [
+        "Unsafe query construction",
+        "Missing input validation evidence",
+        "Missing secure coding review evidence"
+      ],
+      "recommendations": [
+        "Use parameterized queries for all database access",
+        "Validate request query parameters with a schema validator",
+        "Attach secure coding review and SAST evidence"
+      ]
+    }
+  ]
+}

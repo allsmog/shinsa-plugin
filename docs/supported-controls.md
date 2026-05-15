@@ -20,6 +20,7 @@ Shinsa assesses code-level and repository-level evidence. It does not replace po
 | A.8.10 Information deletion | Hybrid | Deletion code is assessable; retention approvals and disposal records remain manual |
 | A.8.11 Data masking | Automated/Hybrid | Response masking and log redaction are assessable |
 | A.8.12 Data leakage prevention | Automated/Hybrid | Validation, output encoding, error handling, CORS, and headers are assessable |
+| A.8.28 Secure coding | Automated/Hybrid | Input validation, parameterized queries, safe deserialization, dynamic execution avoidance, request limits, and secure defaults are assessable |
 | A.8.15 Logging | Hybrid | Event logging code is assessable; retention and SIEM operations remain manual |
 | A.8.16 Monitoring activities | Hybrid | Health checks, metrics, and alert config are assessable; operational response evidence remains manual |
 | A.8.17 Clock synchronization | Hybrid | UTC and timestamp handling are assessable; NTP operations remain manual |

@@ -173,7 +173,11 @@ These are the primary controls assessable from source code.
 - Error handling (no information leakage)
 - Secure defaults
 - Dependency management (no known vulnerabilities)
+- No dynamic code execution with untrusted input (`eval`, `Function`, shell execution)
+- Safe deserialization and template rendering
+- Request size limits and parser hardening for exposed endpoints
 **Pass criteria**: Input validated, queries parameterized, errors handled safely
+**Common findings**: SQL string concatenation, missing request validation, unsafe deserialization, user input passed to shell commands, stack traces exposed in production
 
 ### A.8.31 — Separation of Development, Test and Production Environments
 **Requirement**: Development, testing and production environments shall be separated and secured.

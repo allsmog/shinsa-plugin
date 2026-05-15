@@ -42,6 +42,7 @@ The full scan produces standalone scored results for:
 - A.8.10
 - A.8.11
 - A.8.12
+- A.8.28
 - A.8.15
 - A.8.16
 - A.8.17
@@ -121,7 +122,7 @@ Use this domain mapping:
 
 - `auth-assessor`: A.8.2, A.8.3, A.8.5
 - `crypto-assessor`: A.8.21, A.8.24
-- `data-protection-assessor`: A.8.10, A.8.11, A.8.12, A.5.14
+- `data-protection-assessor`: A.8.10, A.8.11, A.8.12, A.8.28, A.5.14
 - `logging-assessor`: A.8.15, A.8.16, A.8.17, A.8.34
 
 Update state:

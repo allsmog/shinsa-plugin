@@ -14,6 +14,12 @@
       "target": "nist-quick-check"
     },
     {
+      "id": "trigger-iso-secure-coding-quick",
+      "query": "Check ISO A.8.28 secure coding for this API.",
+      "should_trigger": true,
+      "target": "quick-check"
+    },
+    {
       "id": "trigger-maintainer-plan",
       "query": "Plan how to add ISO A.8.28 coverage to the plugin.",
       "should_trigger": true,

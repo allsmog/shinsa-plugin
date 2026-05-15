@@ -6,7 +6,7 @@ Shinsa is still markdown prompts, reference skills, and small validation scripts
 
 ## What You Get
 
-- 13 shipped ISO 27001 and 53 shipped NIST SP 800-53 controls
+- 14 shipped ISO 27001 and 53 shipped NIST SP 800-53 controls
 - 10 domain assessor agents plus 3 cold reviewer agents
 - Durable run artifacts under `shinsa-output/runs/<assessment_id>/`
 - Enterprise evidence packs with executive summary, control matrix, evidence index, reviewer notes, limitations, and human sign-off
@@ -108,7 +108,7 @@ Quick checks use the same artifact contract, but with one assessor and one conde
 |-------|--------|----------|
 | `auth-assessor` | Authentication and access control | A.8.2, A.8.3, A.8.5 |
 | `crypto-assessor` | Cryptography and network services | A.8.21, A.8.24 |
-| `data-protection-assessor` | Data protection and information transfer | A.8.10, A.8.11, A.8.12, A.5.14 |
+| `data-protection-assessor` | Data protection, secure coding, and information transfer | A.8.10, A.8.11, A.8.12, A.8.28, A.5.14 |
 | `logging-assessor` | Logging, monitoring, and audit testing | A.8.15, A.8.16, A.8.17, A.8.34 |
 
 ### NIST SP 800-53 Assessors

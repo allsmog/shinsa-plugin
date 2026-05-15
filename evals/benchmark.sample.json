@@ -15,6 +15,12 @@
       "observed_trigger_rate": 1.0
     },
     {
+      "case_id": "trigger-iso-secure-coding-quick",
+      "target": "quick-check",
+      "should_trigger": true,
+      "observed_trigger_rate": 1.0
+    },
+    {
       "case_id": "trigger-maintainer-plan",
       "target": "control-plan",
       "should_trigger": true,
@@ -152,6 +158,26 @@
         {
           "control_id": "A.8.5",
           "file_path": "src/auth/password.ts",
+          "start_line": 1
+        }
+      ]
+    },
+    {
+      "case_id": "iso-secure-coding-quick-check",
+      "command": "quick-check",
+      "status": "passed",
+      "artifact_root": "evals/fixtures/artifacts/iso-secure-coding-quick-check",
+      "source_root": "evals/fixtures/sample-app",
+      "review_rounds": [
+        {
+          "angle": "control_interpretation",
+          "status": "approved"
+        }
+      ],
+      "findings": [
+        {
+          "control_id": "A.8.28",
+          "file_path": "src/routes/search.ts",
           "start_line": 1
         }
       ]
